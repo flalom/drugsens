@@ -1,0 +1,34 @@
+Package: DRUGSENS
+Title: Get Data From QuPath For Data Analysis
+Version: 0.1.0
+BugReports: https://git.scicore.unibas.ch/ovca-research/DRUGSENS/issues
+Authors@R: c(
+    person("Flavio", "Lombardo", "C.", "flavio.lombardo@unibas.ch", role = c("aut", "cre", "cph")),
+    person("Ovarian Cancer Research", role = c("cph")),   
+    person("University of Basel and University Hospital Basel", role = c("cph"))   
+    )
+URL: https://git.scicore.unibas.ch/ovca-research/DRUGSENS/
+Maintainer: Flavio C. Lombardo <flavio.lombardo@unibas.cht>
+Description: This package simplifies the analysis of QuPath data is complementary to the STAR Protocol: 
+    "DRUG-SENS: Quantification of Drug Sensitivity in 3D Patient-derived Ovarian Cancer Models"
+License: MIT + file LICENSE
+Imports:
+    dplyr,
+    tidyr,
+    stringr,
+    knitr,
+    testthat,
+    ggplot2,
+    ggpubr,
+    roxygen2
+Depends: 
+    R (>= 4.2)
+VignetteBuilder: 
+    knitr
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
