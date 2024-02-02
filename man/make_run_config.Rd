@@ -4,7 +4,10 @@
 \alias{make_run_config}
 \title{Generates and use a config txt file}
 \usage{
-make_run_config()
+make_run_config(overwrite_config = FALSE)
+}
+\arguments{
+\item{overwrite_config}{Boolean, if TRUE the \code{config_DRUGSENS.txt} will be overwritten (default is FALSE)}
 }
 \value{
 A \code{dataframe}/\code{tibble}.

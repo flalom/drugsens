@@ -2,3 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rprofile
+*.txt
+*.pdf
+*.html
+figures/**
+temp/**

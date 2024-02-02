@@ -3,10 +3,11 @@
 #' When this function run the first time, it will generated a config.txt file in the user working directory.
 #' It will import the data config file into the use environment. This data will be used to change the column names
 #' of the imported dataset and change the name of the markers that is often incorrectly exported.
+#' @param overwrite_config Boolean, if TRUE the `config_DRUGSENS.txt` will be overwritten (default is FALSE)
 #' @export
 #' @return A `dataframe`/`tibble`.
 #' @example
-make_run_config <- function() {
+make_run_config <- function(overwrite_config = FALSE) {
   if (file.exists("config_DRUGSENS.txt")) {
     tryCatch(
       expr = {
@@ -19,7 +20,8 @@ make_run_config <- function() {
                 Once the 'config.txt' is available re-run run_config to veryfy that the data was correctly read")
       }
     )
-  } else {
+  } else if (overwrite_config){
+    message("Overwriting config_DRUGSENS.txt")
     write(
       x =
         (
@@ -27,7 +29,25 @@ make_run_config <- function() {
         # List of markers to relabel
         list_of_relabeling =
         list(
-            "PathCellObject" = "DAPI",
+            "PathCellObject" = "onlyDAPIPositve",
+            "cCasp3" = "cCASP3",
+            "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
+            "EpCAM_E-Cadherin" = "E-Cadherin",
+            "EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3"
+          )'
+        ),
+      file = paste0(path.expand(getwd()), "/config_DRUGSENS.txt")
+    )
+    message("config_DRUGSENS.txt has been overwritten correctly.")
+  } else {
+    write(
+      x =
+        (
+          '
+        # List of markers to relabel
+        list_of_relabeling =
+        list(
+            "PathCellObject" = "onlyDAPIPositve",
             "cCasp3" = "cCASP3",
             "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
             "EpCAM_E-Cadherin" = "E-Cadherin",

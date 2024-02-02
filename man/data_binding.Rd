@@ -6,14 +6,14 @@
 \usage{
 data_binding(
   path_to_the_projects_folder,
-  files_extension_to_look_for,
+  files_extension_to_look_for = "csv",
   recursive_search = FALSE
 )
 }
 \arguments{
-\item{path_to_the_projects_folder}{The path where the files coming out of QuPath are located}
+\item{path_to_the_projects_folder}{String/Path The path where the files coming out of QuPath are located}
 
-\item{files_extension_to_look_for}{The extension of the file outputted from QuPath}
+\item{files_extension_to_look_for}{String The extension of the file outputted from QuPath, (default is "csv")}
 
 \item{recursive_search}{Boolean, it defined the behavior of the file search, if recursive or not, (default is FALSE)}
 }
