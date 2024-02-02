@@ -14,8 +14,6 @@ generate_qupath_script <- function() {
     x = paste0('
 //This code script was tested with QuPath 4
 
-//This code script was tested with QuPath 4
-
 import qupath.lib.gui.tools.MeasurementExporter
 import qupath.lib.objects.PathCellObject
 import qupath.lib.objects.PathDetectionObject
@@ -42,8 +40,8 @@ def exportType = PathCellObject.class
 // Choose your *full* output path
 def outputPath = "<USER_DEFINED_PATH>/<PID>_<TISSUE>_',Sys.Date(),'_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
 def outputFile = new File(outputPath)
-// example <USER_DEFINED_PATH>/B39_Ascites_2023.11.10_DOC2023.10.05_NIRAPARIB_1000_nM_Rep_EpCAM_Ecad_cCasp3_ QuPath will add (series 1) at the end of this line
-// example <USER_DEFINED_PATH>/B39_Ascites_2023.11.10_DOC2023.10.05_NIRAPARIB_1000_nM_Rep_EpCAM_Ecad_cCasp3_(series 01).tif
+// example <USER_DEFINED_PATH>/B39_Ascites_2023.11.10_DOC2023.10.05_Niraparib_1000_nM_Rep_EpCAM_Ecad_cCasp3_ QuPath will add (series 1) at the end of this line
+// example <USER_DEFINED_PATH>/B39_Ascites_2023.11.10_DOC2023.10.05_Niraparib_1000_nM_Rep_EpCAM_Ecad_cCasp3_(series 01).tif
 // the part EpCAM_Ecad_cCasp3_ is optional but recommended
 
 // Create the measurementExporter and start the export

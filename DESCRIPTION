@@ -3,7 +3,8 @@ Title: Get Data From QuPath For Data Analysis
 Version: 0.1.0
 BugReports: https://git.scicore.unibas.ch/ovca-research/DRUGSENS/issues
 Authors@R: c(
-    person("Flavio", "Lombardo", "C.", "flavio.lombardo@unibas.ch", role = c("aut", "cre", "cph")),
+    person("Flavio", "Lombardo", , "flavio.lombardo@unibas.ch", role = c("aut", "cre", "cph")),
+    person("Ricardo Coelho", role = c("cph")),   
     person("Ovarian Cancer Research", role = c("cph")),   
     person("University of Basel and University Hospital Basel", role = c("cph"))   
     )
@@ -15,12 +16,14 @@ License: MIT + file LICENSE
 Imports:
     dplyr,
     tidyr,
+    readr,
     stringr,
     knitr,
-    testthat,
     ggplot2,
     ggpubr,
-    roxygen2
+    roxygen2,
+    tidyselect,
+    testthat
 Depends: 
     R (>= 4.2)
 VignetteBuilder: 
