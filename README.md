@@ -1,7 +1,7 @@
 ![](https://img.shields.io/badge/R-%3E%3D%204.0.0-blue)
 
 # Overview
-DRUGSENS is a R-package tha allow users to automatically analyze QuPath&trade; output data from imaging analysis. 
+DRUGSENS is a R-package that allows users to automatically analyze QuPath&trade; output data from imaging analysis. 
 Here we include a QuPath&trade; script to run reproducible QuPath&trade;-based image analysis, and some examples on how DRUGSENS can be used. For more detailed examples of QuPath&trade; scripting please refer to [QuPath&trade;'s Documentation](https://qupath.readthedocs.io/en/stable/). 
 This script should be placed into scripts within QuPath&trade;. We tested this code to a previous version of QuPath&trade.
 This packge is complementary to the STAR protocol: `...`
@@ -9,7 +9,7 @@ This packge is complementary to the STAR protocol: `...`
 # Installation
 
 ``` r
-devtools::install_gitlab("https://git.scicore.unibas.ch/ovca-research/drugsens")
+devtools::install_git("https://git.scicore.unibas.ch/ovca-research/drugsens")
 # OR
 devtools::install_github("https://github.com/flalom/drugsens") # this is the mirroring repo of the gitlab
 ```

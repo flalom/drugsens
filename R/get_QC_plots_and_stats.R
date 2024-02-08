@@ -108,7 +108,7 @@ get_QC_plots_parsed_merged_data <- function(.data,
 
       if (save_plots) {
         if (save_plots_in_patient_specific_subfolders) {
-          if (!dir.exists(paste0(saving_plots_folder, "/", pid))) dir.create(paste0(saving_plots_folder, "/", pid))
+          if (!dir.exists(paste0(saving_plots_folder, "/", pid))) dir.create(paste0(saving_plots_folder, "/", pid), showWarnings = F, recursive = T)
           ggsave(
             plot = p,
             filename = paste0(
@@ -128,7 +128,7 @@ get_QC_plots_parsed_merged_data <- function(.data,
           )
         } else {
           # Saving plots in .pdf at 600 dpi
-          if (!dir.exists(saving_plots_folder)) dir.create(saving_plots_folder)
+          if (!dir.exists(saving_plots_folder)) dir.create(saving_plots_folder, showWarnings = F, recursive = T)
           ggsave(
             plot = p,
             width = p_width,
