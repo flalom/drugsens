@@ -59,7 +59,6 @@ get_QC_plots_parsed_merged_data <- function(.data,
     subset_data <- .data[.data[[PID_column_name]] == pid, ]
 
     for (i in list_of_columns_to_plot) {
-      # if (!isolate_specific_drug %in% subset_data[[drug_column_name]] |> unique()) stop("ERROR: The `isolate_specific_drug` is not included in the name of the availble treaments.")
       if (!is.null(isolate_specific_drug)) subset_data <- subset_data[subset_data[[drug_column_name]] %in% isolate_specific_drug, ]
 
       if (nrow(subset_data) < 1) {
@@ -108,7 +107,8 @@ get_QC_plots_parsed_merged_data <- function(.data,
 
       if (save_plots) {
         if (save_plots_in_patient_specific_subfolders) {
-          if (!dir.exists(paste0(saving_plots_folder, "/", pid))) dir.create(paste0(saving_plots_folder, "/", pid))
+
+          if (!dir.exists(paste0(saving_plots_folder, "/", pid))) dir.create(paste0(saving_plots_folder, "/", pid), showWarnings = F, recursive = T)
           ggsave(
             plot = p,
             filename = paste0(
@@ -128,7 +128,7 @@ get_QC_plots_parsed_merged_data <- function(.data,
           )
         } else {
           # Saving plots in .pdf at 600 dpi
-          if (!dir.exists(saving_plots_folder)) dir.create(saving_plots_folder)
+          if (!dir.exists(saving_plots_folder)) dir.create(saving_plots_folder, showWarnings = F, recursive = T)
           ggsave(
             plot = p,
             width = p_width,

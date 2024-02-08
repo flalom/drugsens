@@ -43,12 +43,8 @@ change_data_format_to_longer <- function(.data,
 
   if (length(col_names_of_markers) < 1) stop(paste0("Failed to find pattern: ", pattern_column_markers, " in the columnames"))
 
-  # if (!all(additional_columns_to_use %in% colnames(.data))) stop(paste0('One or more of the following columnames:
-  #                                                    c(Treatment", "PID", "Image_number", "Tissue", "Concentration", "DOC") could not be found.
-  #                                                    Please check the names of your data.frame and/or provide your selection'),
-  #                                                    "Those are the colnames found in the input data: ",
-  #                                                    colnames(.data))
   if (!"Image_number" %in% additional_columns_to_use) stop("Image_number has to be in the dataframe.")
+
   if (!"Treatment_complete" %in% additional_columns_to_use) stop("Treatment_complete has to be in the dataframe.")
 
 

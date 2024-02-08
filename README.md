@@ -1,17 +1,20 @@
 ![](https://img.shields.io/badge/R-%3E%3D%204.0.0-blue)
 
 # Overview
-DRUGSENS is a R-package tha allow users to automatically analyze QuPath&trade; output data from imaging analysis. 
-Here we include a QuPath&trade; script to run reproducible QuPath&trade;-based image analysis, and some examples on how DRUGSENS can be used. For more detailed examples of QuPath&trade; scripting please refer to [QuPath&trade;'s Documentation](https://qupath.readthedocs.io/en/stable/). 
-This script should be placed into scripts within QuPath&trade;. We tested this code to a previous version of QuPath&trade.
-This packge is complementary to the STAR protocol: `...`
+
+DRUGSENS is a R-package that allows users to automatically analyze QuPath&trade;'s output data from imaging analysis. 
+Here we include a QuPath&trade; script (the same that we regularly use) to run reproducible QuPath&trade;-based image analysis, and some examples on how DRUGSENS can be used. For more detailed examples of QuPath&trade; scripting and usage please refer to [QuPath&trade;'s Documentation](https://qupath.readthedocs.io/en/stable/). 
+This script should be placed into scripts manager within QuPath&trade;. We tested this code with previous versions of QuPath&trade;, but new versions should also be compatible.
+This package is complementary to the STAR protocol: `...`
 
 # Installation
 
 ``` r
-devtools::install_gitlab("https://git.scicore.unibas.ch/ovca-research/drugsens")
+devtools::install_git("https://git.scicore.unibas.ch/ovca-research/drugsens")
+
 # OR
-devtools::install_github("https://github.com/flalom/drugsens") # this is the mirroring repo of the gitlab
+
+devtools::install_github("https://github.com/flalom/drugsens") # this is the GitLab's mirroring repo
 ```
 
 `devtools` is required to install DRUGSENS. If `devtools` is not installed yet you can install it with:
@@ -313,4 +316,4 @@ Renv will automatically activate and install the necessary packages as specified
 ### Reporting Issues
 If you encounter any bugs or have suggestions for improvements, please file an issue using our [GitLab Issue]("https://git.scicore.unibas.ch/ovca-research/DRUGSENS/issues"). Be sure to include as much information as possible to help us understand and address the issue.
 
-Please make sure to file the issue in gitlab as the GitHub is a mirror repo.
+Please make sure to file the issue in the GitLab repo as this one in GitHub is a forward-only mirror repo.
