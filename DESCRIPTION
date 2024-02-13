@@ -1,5 +1,6 @@
 Package: DRUGSENS
-Title: Get Data From QuPath For Data Analysis
+Title: DRUGSENS is a R-package that allows users to automatically analyze QuPath™'s output data from imaging analysis.
+       In addition, it will automatically extract metadata from the QuPath's data.
 Version: 0.1.0
 BugReports: https://git.scicore.unibas.ch/ovca-research/DRUGSENS/issues
 Authors@R: c(
@@ -9,7 +10,7 @@ Authors@R: c(
     person("University of Basel and University Hospital Basel", role = c("cph"))   
     )
 URL: https://git.scicore.unibas.ch/ovca-research/DRUGSENS/
-Maintainer: Flavio C. Lombardo <flavio.lombardo@unibas.cht>
+Maintainer: Flavio Lombardo <flavio.lombardo@unibas.ch>
 Description: This package simplifies the analysis of QuPath data is complementary to the STAR Protocol: 
     "DRUG-SENS: Quantification of Drug Sensitivity in 3D Patient-derived Ovarian Cancer Models"
 License: MIT + file LICENSE
