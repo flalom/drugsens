@@ -30,6 +30,127 @@ pak::pak("r-lib/devtools")
 
 You can have a look at it [devtools](https://github.com/r-lib/devtools)
 
+### QuPath script
+__This is the script used in the STAR protocol, regarding the QuPath imaging analysis.__
+``` groovy
+
+/**
+ * This QuPath script will take a full image as an annotation
+ *
+ * 1. Change path to export data, line 41
+ * 2. Make sure that the channel order is DAPI, E-Cadherin, and Cleaved Caspase 3
+ *      a) if this is not the case, change line 38 (setChannelNames) accordingly
+ * 3. Your QuPath project must contain classifiers called "Cleaved Caspase 3" and "E-Cadherin"
+ *    If you do not have them, you can download them from our repository,
+ *    or create them yourself:
+ *      i) In a image, create a selection of the full image (run lines 52-59)
+ *      ii) Detect cells (run line 61)
+ *      iii) In the Annotation tab, create new classification classes (Add class) called "Cleaved Caspase 3" and "E-Cadherin"
+ *      iv) Create classifiers (from the menu Classify > Object Classification > Create single measurement classifier)
+ *      v) Name the new classifier "Cleaved Caspase 3", and use following parameters
+ *              Object filter = Detections (all)
+ *              Channel filter = Cleaved Caspase 3
+ *              Measurement = Nucleus: Cleaved Caspase 3 mean
+ *              Threshold = 200 (value may differ for your image)
+ *              Above threshold = Cleaved Caspase 3
+ *      vi) Name the new classifier "E-Cadherin", and use following parameters
+ *              Object filter = Detections (all)
+ *              Channel filter = E-Cadherin
+ *              Measurement = Nucleus: E-Cadherin mean
+ *              Threshold = 180 (value may differ for your image)
+ *              Above threshold = E-Cadherin
+ * 4. Select Run -> Run for project
+ *    It will go through all images in the project, run segmentation
+ *    & apply those 2 classifiers we set up before.
+ *
+ * Note:
+ *    You are encouraged to check and adjust the classifier before you run them on your own images.
+ *    For this, follow steps 3.i) - 3.vi)
+ */
+
+import static qupath.lib.gui.scripting.QPEx.*
+
+// Define the path for data export
+def path = '<USER_DEFINED_PATH>'
+
+setImageType('FLUORESCENCE');
+setChannelNames ('DAPI', 'E-Cadherin', 'Cleaved Caspase 3')
+
+def name = getProjectEntry().getImageName() + '.txt'
+path = buildFilePath(path, '<PID>_<TISSUE>_',Sys.Date(),'_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>')
+mkdirs(path)
+path = buildFilePath(path, name)
+
+// Create a new rectangle annotation & add it to the hierarchy
+import qupath.lib.roi.RectangleROI
+import qupath.lib.objects.PathAnnotationObject
+def x_dim = getCurrentImageData().getServer().getWidth()
+def y_dim = getCurrentImageData().getServer().getHeight()
+def roi = new RectangleROI(0, 0, x_dim, y_dim)
+def annotation = new PathAnnotationObject(roi)
+addObject(annotation)
+setSelectedObject(annotation)
+
+runPlugin('qupath.imagej.detect.cells.WatershedCellDetection', '{"detectionImage": "DAPI",  "requestedPixelSizeMicrons": 0.5,  "backgroundRadiusMicrons": 8.0,  "medianRadiusMicrons": 0.0,  "sigmaMicrons": 2,  "minAreaMicrons": 5.0,  "maxAreaMicrons": 500.0,  "threshold": 45.0,  "watershedPostProcess": true,  "cellExpansionMicrons": 7.5,  "includeNuclei": true,  "smoothBoundaries": true,  "makeMeasurements": true}')
+runObjectClassifier("Cleaved Caspase 3", "E-Cadherin")
+
+saveAnnotationMeasurements(path)
+print 'Results exported to ' + path
+```
+
+And this script for exporting the data:
+
+``` groovy
+
+/**
+ * QuPath script to export measurements from all analysed images in a project
+ *
+ * 1. Define columns you would like to export (line 28)
+ * 2. In line 17, specify the path where to save your results
+ */
+
+import qupath.lib.gui.tools.MeasurementExporter
+import qupath.lib.objects.PathCellObject
+import qupath.lib.objects.PathDetectionObject
+import qupath.lib.objects.PathAnnotationObject
+import qupath.lib.objects.PathRootObject
+
+// Choose your *full* output path
+def outputPath = "<PID>_<TISSUE>_',Sys.Date(),'_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
+
+// Get the list of all images in the current project
+def project = getProject()
+def imagesToExport = project.getImageList()
+
+// Separate each measurement value in the output file with ","
+def separator = ","
+
+// Choose the columns that will be included in the export
+// Note: if 'columnsToInclude' is empty, all columns will be included
+def columnsToInclude = new String[]{"Image", "Name", "Class","Centroid X µm","Centroid Y µm","Nucleus: Area", "Nucleus: DAPI mean","Nucleus: E-Cadherin mean", "Nucleus: Cleaved Caspase 3 mean", "Cell: Area","Cell: E-Cadherin mean", "Cell: Cleaved Caspase 3 mean","Cytoplasm: E-Cadherin mean","Cytoplasm: Cleaved Caspase 3 mean","Nucleus/Cell area ratio"}
+
+// Choose the type of objects that the export will process
+// Other possibilities include:
+//    1. PathAnnotationObject
+//    2. PathDetectionObject
+//    3. PathRootObject
+// Note: import statements should then be modified accordingly
+def exportType = PathCellObject.class
+
+def outputFile = new File(outputPath)
+
+// Create the measurementExporter and start the export
+def exporter  = new MeasurementExporter()
+        .imageList(imagesToExport)            // Images from which measurements will be exported
+        .separator(separator)                 // Character that separates values
+        .includeOnlyColumns(columnsToInclude) // Columns are case-sensitive
+        .exportType(exportType)               // Type of objects to export
+        .exportMeasurements(outputFile)        // Start the export process
+
+print "Done!"
+```
+
+
 # Usage
 
 ## Example
@@ -37,7 +158,7 @@ You can have a look at it [devtools](https://github.com/r-lib/devtools)
 We recommend making a new project when working with `DRUGSENS`, to have clear and defined path. This will make the data analysis much easier and reproducible. 
 You can also set you working directory with `setwd()`.
 
-### QuPath script used
+### QuPath data in R
 
 To make the QuPath script locally available within the working directory, with the currents date:
 
@@ -49,53 +170,6 @@ generate_qupath_script()
 This function will generate a `script_for_qupath.txt` file with the code that one can copy/paste into the __QuPath's script manager__. All the sections that contain \<\> should be replaced with the user experimental information. The `columnsToInclude` in the script should also be user defined, depending on the markers used. 
 
 It is very important that the file naming structure of the QuPath's output is maintained for `DRUGSENS` to work correctly.
-
-``` groovy
-//This groovy snipped script was tested with QuPath 4
-
-import qupath.lib.gui.tools.MeasurementExporter
-import qupath.lib.objects.PathCellObject
-import qupath.lib.objects.PathDetectionObject
-
-// Get the list of all images in the current project
-def project = getProject()
-def imagesToExport = project.getImageList()
-
-// Separate each measurement value in the output file with a tab ("\t")
-def separator = ","
-
-// Choose the columns that will be included in the export
-// Note: if columnsToInclude is empty, all columns will be included
-def columnsToInclude = new String[]{"Image", "Name", "Class","Centroid X µm","Centroid Y µm","Nucleus: Area", "Nucleus: DAPI mean","Nucleus: E-Cadherin mean", "Nucleus: Cleaved caspase 3 mean", "Cell: Area","Cell: E-Cadherin mean", "Cell: Cleaved caspase 3 mean","Cytoplasm: E-Cadherin mean","Cytoplasm: Cleaved caspase 3 mean","Nucleus/Cell area ratio"}
-
-// Choose the type of objects that the export will process
-// Other possibilities include:
-//    1. PathAnnotationObject
-//    2. PathDetectionObject
-//    3. PathRootObject
-// Note: import statements should then be modified accordingly
-def exportType = PathCellObject.class
-
-// Choose your *full* output path
-def outputPath = "<USER_DEFINED_PATH>/<PID>_<TISSUE>_',Sys.Date(),'_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
-def outputFile = new File(outputPath)
-// example <USER_DEFINED_PATH>/B39_Ascites_2023.11.10_DOC2023.10.05_Niraparib_1000_nM_Rep_EpCAM_Ecad_cCasp3_ QuPath will add (series 1, 2 ...etc) at the end of this line, to indicate the stack number
-// example <USER_DEFINED_PATH>/B39_Ascites_2023.11.10_DOC2023.10.05_Niraparib_1000_nM_Rep_EpCAM_Ecad_cCasp3_(series 01).tif
-//"PID.001_Ascites_2023-11-25_DOC2020-12-14_CarboplatinPaclitaxel_100_uM_10_nM_Ecad_cCasp3_(series 01).tif"
-//"A8759_Spleen_2020.11.10_DOC2001.10.05_Compoundx34542_1000_uM_EpCAM_Ecad_cCasp3_(series 01).tif"
-//"A8759_Spleen_2020.11.10_DOC2001.10.05_Compoundx34542_1000_uM_EpCAM_Ecad_cCasp3_(series 01).tif"
-//"B38_Eye_2023.11.10_DOC2023.10.05_GentamicinePaclitaxel_100_uM_10_nM_EpCAM_Ecad_cCasp3_(series 01).tif"
-
-// Create the measurementExporter and start the export
-def exporter  = new MeasurementExporter()
-        .imageList(imagesToExport)            // Images from which measurements will be exported
-        .separator(separator)                 // Character that separates values
-        .includeOnlyColumns(columnsToInclude) // Columns are case-sensitive
-        .exportType(exportType)               // Type of objects to export
-        .exportMeasurements(outputFile)       // Start the export process
-
-print "Done!"
-```
 
 > 📝**NOTE** 
 >The column `Image` must be present in the data for DRUGSENS to parse the metadata correctly. Title style (This Is An Example) is fine, but if you have a drug combination refer to the formatting as described below [Handling drug combinations](#bind-qupath-files).
@@ -126,7 +200,7 @@ system.file("extdata/to_merge/", package = "DRUGSENS")
 ```
 
 ### Bind QuPath files
-At first the data is a bunch of separate files which are difficult to make sense of; therefore as first step let's bind them together into a single R dataframe! This should take very little time.
+At first the data is a bunch of separate files which are difficult to make sense of; therefore as first step let's bind them together into a single R dataframe!
 The example data can be bound together with this command:
 ``` r
 bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/", package = "DRUGSENS"), files_extension_to_look_for = "csv")
@@ -135,7 +209,7 @@ You will be now able to `View(bind_data)`. You should see all the image stacks f
 In this code snippets we show an example of mock data `unique(bind_data$PID)` with PIDs: `"A8759" "B36"   "B37", "B38", "B39"` and tissue `"Spleen", "p.wash", "Ascites", "Eye"``. You will have all the metadata in one go and also for drug combinations!
 
 > ⚠️ **WARNING**: As long as you keep the formatting as the above examples. 
-The dates should also be in the format **yyy-mm-dd**. For the double combinations the two drugs should be written together with each of the different drug capilized (**C**arboplatin**P**aclitaxel) and the rest lowercased letters. 
+The dates should also be in the format **yyy-mm-dd**. For the combinations of two drugs they should be written together with each of the different drug capilized (**C**arboplatin**P**aclitaxel) and the rest lowercased letters. 
 For example **CarboplatinPaclitaxel_100_uM_10_nM**. This indicates a drug combination of Carboplatin 100_uM and Paclitaxel 10_nM. Each drug amount and each unit should always be separated by `_`. The first 100_uM belongs to the Carboplatin and the 10_nM belongs to the Paclitaxel. Those constrains are due to the parsing of the strings into useful metadata. If some of the data is not present, you can use a `.` separated by `_`. If you need additional data parsing, please let us know by filing an issue on GitLab [GitLab Issue]("https://git.scicore.unibas.ch/ovca-research/DRUGSENS/issues").
 
 ### Counting the number of positiive cells for each marker in every image
@@ -144,8 +218,8 @@ This function will take the previous step's generated dataframe and it will coun
 counts_dataframe <- make_count_dataframe(bind_data)
 ```
 
-### Some plotting
-This function will take the previous step's generated dataframe (`bind_data`) and it will generate some plots for every cell marker and for some key features from the QuPath metadata, such as nucleus area of the markers and the mean of expression per maker. The script will generate separate folders for each PID in the dataset. There might be quite some plots, therefore you can isolate specific PID or specific treatment, if that is required. With `fill_color_variable` different variables present in the metadata can be tested to visualize the data.
+### Plotting
+This function will take the previous step's generated dataframe (`bind_data`) and it will generate some plots for every cell marker and for some key features from the QuPath metadata, such as nucleus area of cell and the mean of marker intensity. The script will generate separate folders for each PID in the dataset. There might be quite some plots, therefore you can isolate specific PID or specific treatment, if that is required. With `fill_color_variable` different variables present in the metadata can be tested to visualize the data.
 ``` r
 get_QC_plots_parsed_merged_data(bind_data, 
                                 fill_color_variable = "Tissue", 
@@ -184,7 +258,7 @@ That follows the structure suggested in the QuPath script
 ```         
 "<USER_DEFINED_PATH>/<PID>_<TISSUE>_',Sys.Date(),'_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
 ```
-> ⚠️ **WARNING**: It is highly recommended to follow the recommended naming structure to obtain the correct output. The dates should also be in the format **yyy-mm-dd**. For the double combinations the two drugs should be wrote together with each of the different drug capilized (**C**arboplatin**P**aclitaxel) and the rest lowercased letters. 
+> ⚠️ **WARNING**: It is highly recommended to follow the recommended naming structure to obtain the correct output. The dates should also be in the format **yyy-mm-dd**. For combinations of two drugs they should be written together with each of the different drug capilized (**C**arboplatin**P**aclitaxel) and the rest lowercased letters. 
 For example **CarboplatinPaclitaxel_100_uM_10_nM**. This indicates a drug combination of Carboplatin 100_uM and Paclitaxel 10_nM. Each drug amount and each unit should always be separated by `_`. The first 100_uM belongs to the Carboplatin and the 10_nM belongs to the Paclitaxel. Those constrains are due to the parsing of the string into useful metadata. If some of the data is not present, you can use a `.` separated by `_`.
 
 ### Data Binding and Processing

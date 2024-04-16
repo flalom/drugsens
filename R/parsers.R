@@ -8,8 +8,15 @@
 #' @importFrom stringr str_count
 #' @return A `dataframe`/`tibble`.
 #' @param .data dataframe with parsed metadata
+#' @examples
+#'  input_data <- data.frame(Image =
+#'  "B516_Ascites_2023-11-25_DOC2020-12-14_dmso_rep_Ecad_cCasp3_(series 01).tif")
+#'  test <- DRUGSENS:::string_parsing(input_data)
+#'
+#'
 #' @example
 #' data.parsed <- string_parsing(.data)
+#'
 #' #This will return the dataframe of all the data in the folder
 # Main function to bind data from multiple files
 string_parsing <- function(.data) {
@@ -21,12 +28,8 @@ string_parsing <- function(.data) {
 
   multiple_drugs <- list()
 
-  # Idea I could add the configuration of the relative position of the various elements of the text by providing this configuration in the config file
-  # in the case of more complex scenario, in the config file, we offer the possibility to manually define the parsing values for more than 3 drugs
-  # https://bioconductor.org/packages/release/bioc/vignettes/GSVA/inst/doc/GSVA.html
   # extract information from the data
   .data$PID <- sapply(strsplit(.data$Image, "_"), `[`, 1, simplify = FALSE) |> unlist()
-  # .data$PID <- str_extract(.data$Image, "[A-Z0-9]+(?=_)")
   .data$Tissue <- sapply(strsplit(.data$Image, "_"), `[`, 2, simplify = FALSE) |> unlist()
   .data$Date1 <- str_extract(.data$Image, "\\d{4}.\\d{2}.\\d{2}")
   .data$DOC <- str_extract(.data$Image, "(?<=DOC)\\d{2,4}.\\d{2}.\\d{2,4}")

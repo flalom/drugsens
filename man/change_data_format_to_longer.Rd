@@ -26,3 +26,14 @@ A \code{dataframe}/\code{tibble}.
 \description{
 This function gets the count data data.frame, that has a wider format and it returns a longer-formatted data.frame
 }
+\examples{
+list_of_relabeling =list(  "PathCellObject" = "onlyDAPIPositve",
+"cCasp3" = "cCASP3",  "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
+"EpCAM_E-Cadherin" = "E-Cadherin",
+"EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3")
+bind_data <- data_binding(path_to_the_projects_folder =
+system.file("extdata/to_merge/", package = "DRUGSENS"))
+counts_dataframe <- make_count_dataframe(bind_data)
+plotting_ready_dataframe <-
+change_data_format_to_longer(counts_dataframe)
+}

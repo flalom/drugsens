@@ -19,8 +19,15 @@ data_binding(
 }
 \value{
 A \code{dataframe}/\code{tibble}.
+
+Returns a concatenated dataframe from all the files within the indicated one
 }
 \description{
 This function try to guess the string patterns that are in the dataset and then fill the dataframe
 with that information. Finally the data is combined and combined them into one file
+}
+\examples{
+bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/",
+package = "DRUGSENS"))
+#This will return the dataframe of all the data in the folder
 }

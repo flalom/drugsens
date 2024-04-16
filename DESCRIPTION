@@ -1,5 +1,5 @@
 Package: DRUGSENS
-Title: DRUGSENS is a R-package that allows users to automatically analyze QuPath™'s output data from imaging analysis.
+Title: Allows users to automatically analyze QuPath™'s output data from imaging analysis.
        In addition, it will automatically extract metadata from the QuPath's data.
 Version: 0.1.0
 BugReports: https://git.scicore.unibas.ch/ovca-research/DRUGSENS/issues

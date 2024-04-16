@@ -1,4 +1,8 @@
 # Get a list of all the files that are in a user-specified folder and get a list of full paths
+#' @description
+#' This function lists the content of a selected folder either recursively or not
+#' @keywords internal
+#' @returns list
 list_all_files <- function(define_path, extension, recursive_search) {
   list_listed_files <- list.files(
     path = define_path,
@@ -17,6 +21,10 @@ list_all_files <- function(define_path, extension, recursive_search) {
 }
 
 # Helper function to read and process a single file
+#' @description
+#' This function returns a processed single file
+#' @keywords internal
+#' @returns dataframe
 process_file <- function(file_path,
                          # relabeling_map,
                          extension) {
@@ -71,11 +79,11 @@ process_file <- function(file_path,
 #' @param path_to_the_projects_folder String/Path The path where the files coming out of QuPath are located
 #' @param files_extension_to_look_for String The extension of the file outputted from QuPath, (default is "csv")
 #' @param recursive_search Boolean, it defined the behavior of the file search, if recursive or not, (default is FALSE)
-#'
+#' @returns Returns a concatenated dataframe from all the files within the indicated one
 #' @export
-#' @example
-#' dataframe_output <- data_binding(path_to_the_projects_folder = "<USER_DEFINED_PATH>"
-#'                                  files_extension_to_look_for = "csv")
+#' @examples
+#' bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/",
+#' package = "DRUGSENS"))
 #' #This will return the dataframe of all the data in the folder
 # Main function to bind data from multiple files
 data_binding <- function(path_to_the_projects_folder,

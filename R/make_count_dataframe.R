@@ -7,6 +7,10 @@
 #' @param unique_name_row_identifier The name of the column of the .data where the unique name can be used to counts (it defaults to "filter_image")
 #' @param name_of_the_markers_column The name of the column of the .data where the marker names are expressed (ie E-Caderin, DAPI), "Defaults as Name"
 #' @export
+#' @examples
+#' bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/", package = "DRUGSENS"), files_extension_to_look_for = "csv")
+#' counts_dataframe <- make_count_dataframe(bind_data)
+#' plotting_ready_dataframe <- change_data_format_to_longer(counts_dataframe)
 #' @example
 #' make_count_dataframe(data, name_of_the_markers_column = "Name", unique_name_row_identifier = "filter_image")
 # adding the image number so to identify the distribution

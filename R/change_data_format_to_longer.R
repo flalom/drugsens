@@ -10,8 +10,17 @@
 #' @param additional_columns columns that can be additionally added to the longer formatted data.frame, "Defaults as c("Treatment", "PID", "Image_number", "Tissue", "Concentration", "DOC")"
 #' @param unique_name_row_identifier String that indicates the unique identifier for each image, defaults as "filter_image"
 #' @export
-#' @example
-#' change_data_format_to_longer(.data, pattern_column_markers = "_ratio_of_total_cells", additional_columns = TRUE)
+#' @examples
+#' list_of_relabeling =list(  "PathCellObject" = "onlyDAPIPositve",
+#' "cCasp3" = "cCASP3",  "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
+#' "EpCAM_E-Cadherin" = "E-Cadherin",
+#' "EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3")
+#' bind_data <- data_binding(path_to_the_projects_folder =
+#' system.file("extdata/to_merge/", package = "DRUGSENS"))
+#' counts_dataframe <- make_count_dataframe(bind_data)
+#' plotting_ready_dataframe <-
+#' change_data_format_to_longer(counts_dataframe)
+
 # adding the image number so to identify the distribution
 
 # pivot_longer

@@ -7,9 +7,12 @@
 generate_qupath_script()
 }
 \value{
-\verb{script_for_qupath.txt in local dir}.
+\code{script_for_qupath.txt} in local working directory.
 }
 \description{
 Generate a useful script to consistently save the output data from QuPath in .csv format following the naming conventions
 followed during the package development.
+}
+\examples{
+generate_qupath_script()
 }

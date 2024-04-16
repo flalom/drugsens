@@ -3,12 +3,11 @@
 #' Generate a useful script to consistently save the output data from QuPath in .csv format following the naming conventions
 #' followed during the package development.
 #'
-#' @return `script_for_qupath.txt in local dir`.
+#' @return `script_for_qupath.txt` in local working directory.
 #'
 #' @export
-#' @example
+#' @examples
 #' generate_qupath_script()
-#' script_for_qupath.txt # in the wd
 generate_qupath_script <- function() {
   write(
     x = paste0('
