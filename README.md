@@ -5,7 +5,7 @@
 DRUGSENS is a R-package that allows users to automatically analyze QuPath&trade;'s output data from imaging analysis. 
 Here we include a QuPath&trade; script (the same that we regularly use) to run reproducible QuPath&trade;-based image analysis, and some examples on how DRUGSENS can be used. For more detailed examples of QuPath&trade; scripting and usage please refer to [QuPath&trade;'s Documentation](https://qupath.readthedocs.io/en/stable/). 
 This script should be placed into scripts manager within QuPath&trade;. We tested this code with previous versions of QuPath&trade;, but new versions should also be compatible.
-This package is complementary to the STAR protocol: `...`
+This package is complementary to the STAR protocol: [*Protocol for quantifying drug sensitivity in 3D patient-derived ovarian cancer models DOI: DOI: 10.1016/j.xpro.2024.103274*](https://doi.org/10.1016/j.xpro.2024.103274).
 
 # Installation
 
