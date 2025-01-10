@@ -16,7 +16,7 @@
 #' "EpCAM_E-Cadherin" = "E-Cadherin",
 #' "EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3")
 #' bind_data <- data_binding(path_to_the_projects_folder =
-#' system.file("extdata/to_merge/", package = "DRUGSENS"))
+#' system.file("extdata/to_merge/", package = "drugsens"))
 #' counts_dataframe <- make_count_dataframe(bind_data)
 #' plotting_ready_dataframe <-
 #' change_data_format_to_longer(counts_dataframe)

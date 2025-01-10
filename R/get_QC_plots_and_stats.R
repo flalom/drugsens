@@ -23,7 +23,7 @@
 #' @importFrom dplyr filter
 #' @return A `list`/`NULL`.
 #' @example
-#' ui <- get_QC_plots_parsed_merged_data(bind_data, save_plots = TRUE, save_list_of_plots = TRUE)
+#' \dontrun {qc <- get_QC_plots_parsed_merged_data(bind_data, save_plots = TRUE, save_list_of_plots = TRUE)}
 #' @export
 
 get_QC_plots_parsed_merged_data <- function(.data,

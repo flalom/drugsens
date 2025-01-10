@@ -4,10 +4,12 @@
 \alias{make_run_config}
 \title{Generates and use a config txt file}
 \usage{
-make_run_config(overwrite_config = FALSE)
+make_run_config(overwrite_config = FALSE, forcePath = NULL)
 }
 \arguments{
-\item{overwrite_config}{Boolean, if TRUE the \code{config_DRUGSENS.txt} will be overwritten (default is FALSE)}
+\item{overwrite_config}{Boolean, if TRUE the \code{config_drugsens.txt} will be overwritten (default is FALSE)}
+
+\item{forcePath}{String, Define a custom path for the config file}
 }
 \value{
 A \code{dataframe}/\code{tibble}.

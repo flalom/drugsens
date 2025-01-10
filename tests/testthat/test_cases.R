@@ -1,10 +1,10 @@
 test_that("Verify that the internal file in to_merge examples in exdata are available", {
-  list_files_exdata <- system.file("extdata/to_merge/", package = "DRUGSENS") |> list.files()
+  list_files_exdata <- system.file("extdata/to_merge/", package = "drugsens") |> list.files()
   expect_true(length(list_files_exdata) > 3 )
 })
 
 test_that("Verify that the internal file examples in exdata merged are available", {
-  list_files_exdata <- system.file("extdata/merged/", package = "DRUGSENS") |> list.files()
+  list_files_exdata <- system.file("extdata/merged/", package = "drugsens") |> list.files()
   expect_true(length(list_files_exdata) >= 1 )
 })
 
@@ -42,24 +42,24 @@ test_that("list_all_files returns correct file paths", {
 test_that("Check that the config.txt is made and that it can be read", {
   expect_silent(make_run_config())
   expect_silent(make_run_config())
-  expect_true(file.exists(path.expand(path = paste0(getwd(), "/config_DRUGSENS.txt"))))
+  expect_true(file.exists(path.expand(path = paste0(getwd(), "/config_drugsens.txt"))))
   expect_true(exists("list_of_relabeling"))
 })
 
 test_that("Check that the example file can be read correctly", {
-  datas <- DRUGSENS::data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/", package = "DRUGSENS"))
+  datas <- drugsens::data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/", package = "drugsens"))
   expect_true(exists("datas"))
   expect_equal(ncol(datas), expected = 28)
 })
 
 test_that("Check that the drugs combination have two unit and two concentration and control none", {
-  datas <- DRUGSENS::data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/", package = "DRUGSENS"))
+  datas <- drugsens::data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/", package = "drugsens"))
   expect_true(datas[datas$Treatment == "GentamicinePaclitaxel", "Treatment_complete"][1] == "GentamicinePaclitaxel100uM-10uM" || datas[datas$Treatment == "GentamicinePaclitaxel", "Treatment_complete"][1] == "gentamicinePaclitaxel100uM-10uM")
   expect_true(datas[datas$Treatment == "Control", "Treatment_complete"][1] == "Control" || datas[datas$Treatment == "Control", "Treatment_complete"][1] == "control")
 })
 
 test_that("Config file was there and removed correctly", {
-  expect_silent( file.remove(path.expand(paste0(getwd(), "/config_DRUGSENS.txt"))) )
+  expect_silent( file.remove(path.expand(paste0(getwd(), "/config_drugsens.txt"))) )
 })
 
 test_that("The parsing is working", {
@@ -78,7 +78,7 @@ test_that("The parsing is working", {
                                 ConcentrationUnits1 = "uM",
                                 ConcentrationUnits2 = "nm",
                                 Treatment_complete = "TreatmentRana10uM-15nm")
-  expect_equal(DRUGSENS:::string_parsing(input_data), expected = expected_output)
+  expect_equal(drugsens:::string_parsing(input_data), expected = expected_output)
 })
 
 test_that("Another parsing test", {
@@ -97,7 +97,7 @@ test_that("Another parsing test", {
     ConcentrationUnits1 = NA_character_,
     ConcentrationUnits2 = NA_character_,
     Treatment_complete = "dmso")
-  expect_equal(DRUGSENS:::string_parsing(input_data), expected = expected_output)
+  expect_equal(drugsens:::string_parsing(input_data), expected = expected_output)
   #   Image1 <- "B516_Ascites_2023-11-25_DOC2020-12-14_CarboplatinPaclitaxel_100_uM_10_nM_Ecad_cCasp3_(series 01).tif"
   #   Image2 <- "A8759_Spleen_2020.11.10_DOC2001.10.05_compoundX34542_1000_uM_EpCAM_Ecad_cCasp3_(series 01).tif"
   #   Image3 <- "A8759_Spleen_2020.11.10_DOC2001.10.05_compoundX34542_1000_uM_EpCAM_Ecad_cCasp3_(series 01).tif"

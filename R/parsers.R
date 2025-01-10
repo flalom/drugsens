@@ -9,15 +9,11 @@
 #' @return A `dataframe`/`tibble`.
 #' @param .data dataframe with parsed metadata
 #' @examples
-#'  input_data <- data.frame(Image =
-#'  "B516_Ascites_2023-11-25_DOC2020-12-14_dmso_rep_Ecad_cCasp3_(series 01).tif")
-#'  test <- DRUGSENS:::string_parsing(input_data)
-#'
-#'
+#'  input_data <- data.frame(Image = "B516_Ascites_2023-11-25_DOC2020-12-14_dmso_rep_Ecad_cCasp3_(series 01).tif")
+#'  test <- drugsens:::string_parsing(input_data)
 #' @example
-#' data.parsed <- string_parsing(.data)
-#'
-#' #This will return the dataframe of all the data in the folder
+#' \dontrun {data.parsed <- string_parsing(.data)}
+
 # Main function to bind data from multiple files
 string_parsing <- function(.data) {
   # add the image name

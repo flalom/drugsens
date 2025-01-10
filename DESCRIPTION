@@ -1,20 +1,25 @@
-Package: DRUGSENS
-Title: Allows users to automatically analyze QuPath™'s output data from imaging analysis.
-       In addition, it will automatically extract metadata from the QuPath's data.
+Package: drugsens
+Title: Automated Analysis of QuPath Output Data and Metadata Extraction
+Description: A comprehensive toolkit for analyzing microscopy data output from
+    QuPath software. Provides functionality for automated data processing,
+    metadata extraction, and statistical analysis of imaging results.
+    Designed to complement the STAR Protocol Protocol for quantifying drug 
+    sensitivity in 3D patient-derived ovarian cancer models 
+    10.1016/j.xpro.2024.103274.
 Version: 0.1.0
-BugReports: https://git.scicore.unibas.ch/ovca-research/DRUGSENS/issues
+BugReports: https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues
+SystemRequirements: QuPath™ 4.0.0 or higher
 Authors@R: c(
     person("Flavio", "Lombardo", , "flavio.lombardo@unibas.ch", role = c("aut", "cre", "cph")),
     person("Ricardo Coelho", role = c("cph")),   
     person("Ovarian Cancer Research", role = c("cph")),   
     person("University of Basel and University Hospital Basel", role = c("cph"))   
     )
-URL: https://git.scicore.unibas.ch/ovca-research/DRUGSENS/
+URL: https://git.scicore.unibas.ch/ovca-research/drugsens/
 Maintainer: Flavio Lombardo <flavio.lombardo@unibas.ch>
-Description: This package simplifies the analysis of QuPath data is complementary to the STAR Protocol: 
-    "DRUG-SENS: Quantification of Drug Sensitivity in 3D Patient-derived Ovarian Cancer Models"
 License: MIT + file LICENSE
 Imports:
+    utils,
     dplyr,
     tidyr,
     readr,
@@ -24,15 +29,12 @@ Imports:
     ggpubr,
     roxygen2,
     tidyselect,
-    testthat
+    testthat (>= 3.0.0)
 Depends: 
     R (>= 4.2)
-VignetteBuilder: 
-    knitr
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Suggests: 
-    testthat (>= 3.0.0)
 Config/testthat/edition: 3

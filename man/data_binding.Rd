@@ -28,6 +28,6 @@ with that information. Finally the data is combined and combined them into one f
 }
 \examples{
 bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/",
-package = "DRUGSENS"))
+package = "drugsens"))
 #This will return the dataframe of all the data in the folder
 }

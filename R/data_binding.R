@@ -3,6 +3,19 @@
 #' This function lists the content of a selected folder either recursively or not
 #' @keywords internal
 #' @returns list
+#' @name   "Name", "list_of_relabeling", "marker_positivity","marker_positivity_ratio", "x", "y"
+#' @importFrom utils read.csv
+#' @importFrom stats setNames
+#' @import roxygen2
+#'
+
+# important for the scripts
+globalVariables(c(
+  "Name", "list_of_relabeling", "marker_positivity",
+  "marker_positivity_ratio", "x", "y"
+))
+
+# list all the files
 list_all_files <- function(define_path, extension, recursive_search) {
   list_listed_files <- list.files(
     path = define_path,
@@ -23,6 +36,8 @@ list_all_files <- function(define_path, extension, recursive_search) {
 # Helper function to read and process a single file
 #' @description
 #' This function returns a processed single file
+#' @param file_path Path to the file
+#' @param extension String File extension to filter
 #' @keywords internal
 #' @returns dataframe
 process_file <- function(file_path,
@@ -83,7 +98,7 @@ process_file <- function(file_path,
 #' @export
 #' @examples
 #' bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/",
-#' package = "DRUGSENS"))
+#' package = "drugsens"))
 #' #This will return the dataframe of all the data in the folder
 # Main function to bind data from multiple files
 data_binding <- function(path_to_the_projects_folder,

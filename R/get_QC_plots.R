@@ -14,7 +14,7 @@
 #' @importFrom dplyr filter
 #' @return A `dataframe`/`tibble`.
 #' @example
-#' get_QC_plots(longer_format_dataframe, patient_column_name = "PID", save_plots = TRUE, folder_name = "figures")
+#' \dontrun{get_QC_plots(longer_format_dataframe, patient_column_name = "PID", save_plots = TRUE, folder_name = "figures")}
 #' @export
 get_QC_plots <- function(.data,
                          patient_column_name = "PID",

@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(DRUGSENS)
+library(drugsens)
 
-test_check("DRUGSENS")
+test_check("drugsens")

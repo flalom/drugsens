@@ -17,9 +17,6 @@ This function will parse the data from the Image name and will return the metada
 The metadata will be then associated to the count file as well
 }
 \examples{
- input_data <- data.frame(Image =
- "B516_Ascites_2023-11-25_DOC2020-12-14_dmso_rep_Ecad_cCasp3_(series 01).tif")
- test <- DRUGSENS:::string_parsing(input_data)
-
-
+ input_data <- data.frame(Image = "B516_Ascites_2023-11-25_DOC2020-12-14_dmso_rep_Ecad_cCasp3_(series 01).tif")
+ test <- drugsens:::string_parsing(input_data)
 }

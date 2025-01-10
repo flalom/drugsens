@@ -2,22 +2,20 @@
 
 # Overview
 
-DRUGSENS is a R-package that allows users to automatically analyze QuPath&trade;'s output data from imaging analysis. 
-Here we include a QuPath&trade; script (the same that we regularly use) to run reproducible QuPath&trade;-based image analysis, and some examples on how DRUGSENS can be used. For more detailed examples of QuPath&trade; scripting and usage please refer to [QuPath&trade;'s Documentation](https://qupath.readthedocs.io/en/stable/). 
+drugsens is a R-package that allows users to automatically analyze QuPath&trade;'s output data from imaging analysis. 
+Here we include a QuPath&trade; script (the same that we regularly use) to run reproducible QuPath&trade;-based image analysis, and some examples on how drugsens can be used. For more detailed examples of QuPath&trade; scripting and usage please refer to [QuPath&trade;'s Documentation](https://qupath.readthedocs.io/en/stable/). 
 This script should be placed into scripts manager within QuPath&trade;. We tested this code with previous versions of QuPath&trade;, but new versions should also be compatible.
-This package is complementary to the STAR protocol: [*Protocol for quantifying drug sensitivity in 3D patient-derived ovarian cancer models DOI: DOI: 10.1016/j.xpro.2024.103274*](https://doi.org/10.1016/j.xpro.2024.103274).
+This package is complementary to the STAR protocol: [*Protocol for quantifying drug sensitivity in 3D patient-derived ovarian cancer models DOI: 10.1016/j.xpro.2024.103274*](https://doi.org/10.1016/j.xpro.2024.103274).
 
 # Installation
 
 ``` r
 devtools::install_git("https://git.scicore.unibas.ch/ovca-research/drugsens")
-
 # OR
-
 devtools::install_github("https://github.com/flalom/drugsens") # this is the GitLab's mirroring repo
 ```
 
-`devtools` is required to install DRUGSENS. If `devtools` is not installed yet you can install it with:
+`devtools` is required to install drugsens. If `devtools` is not installed yet you can install it with:
 
 ``` r
 # Install devtools from CRAN
@@ -155,7 +153,7 @@ print "Done!"
 
 ## Example
 
-We recommend making a new project when working with `DRUGSENS`, to have clear and defined path. This will make the data analysis much easier and reproducible. 
+We recommend making a new project when working with `drugsens`, to have clear and defined path. This will make the data analysis much easier and reproducible. 
 You can also set you working directory with `setwd()`.
 
 ### QuPath data in R
@@ -163,26 +161,26 @@ You can also set you working directory with `setwd()`.
 To make the QuPath script locally available within the working directory, with the currents date:
 
 ``` r
-library("DRUGSENS")
+library("drugsens")
 generate_qupath_script()
 ```
 
 This function will generate a `script_for_qupath.txt` file with the code that one can copy/paste into the __QuPath's script manager__. All the sections that contain \<\> should be replaced with the user experimental information. The `columnsToInclude` in the script should also be user defined, depending on the markers used. 
 
-It is very important that the file naming structure of the QuPath's output is maintained for `DRUGSENS` to work correctly.
+It is very important that the file naming structure of the QuPath's output is maintained for `drugsens` to work correctly.
 
 > 📝**NOTE** 
->The column `Image` must be present in the data for DRUGSENS to parse the metadata correctly. Title style (This Is An Example) is fine, but if you have a drug combination refer to the formatting as described below [Handling drug combinations](#bind-qupath-files).
+>The column `Image` must be present in the data for drugsens to parse the metadata correctly. Title style (This Is An Example) is fine, but if you have a drug combination refer to the formatting as described below [Handling drug combinations](#bind-qupath-files).
 
 ### Generate configuration file
-This command will generate a `config_DRUGSENS.txt` that should be edited to include the names of the cell markers that have been used by the experimenter.
+This command will generate a `config_drugsens.txt` that should be edited to include the names of the cell markers that have been used by the experimenter.
 In our case we replaced `"PathCellObject"` with `"onlyDAPIPositve"`.
 
 ``` r
 make_run_config()
 ```
-Once the file `config_DRUGSENS.txt` has been modified; you can feed it back to `R`; this will be done automatically once you run `data_binding()`.
-Now the `list_of_relabeling` should be available in the R environment and it can be used by `DRUGSENS` to work. `list_of_relabeling` is a named list that is required for relabeling the markers name, that is often not user friendly. 
+Once the file `config_drugsens.txt` has been modified; you can feed it back to `R`; this will be done automatically once you run `data_binding()`.
+Now the `list_of_relabeling` should be available in the R environment and it can be used by `drugsens` to work. `list_of_relabeling` is a named list that is required for relabeling the markers name, that is often not user friendly. 
 In case the markers naming doesn't need corrections/relabeling you can leave the `list_of_relabeling` unchanged (but one should still check it).
 
 > 📝**NOTE** It is recommended having no spaces and using camelCase style for the **list of cell markers**:
@@ -196,21 +194,21 @@ In case the markers naming doesn't need corrections/relabeling you can leave the
 
 We present here a few mock datasets, as example workflow. Those files can be explored from the user's R package path:
 ``` r
-system.file("extdata/to_merge/", package = "DRUGSENS")
+system.file("extdata/to_merge/", package = "drugsens")
 ```
 
 ### Bind QuPath files
 At first the data is a bunch of separate files which are difficult to make sense of; therefore as first step let's bind them together into a single R dataframe!
 The example data can be bound together with this command:
 ``` r
-bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/", package = "DRUGSENS"), files_extension_to_look_for = "csv")
+bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/", package = "drugsens"), files_extension_to_look_for = "csv")
 ```
 You will be now able to `View(bind_data)`. You should see all the image stacks from the QuPath in one dataframe. This dataframe will have all the metadata parsed from the `Image` column value for every stack (image x) (this is the first column defined in the in `columnsToInclude` within the `script_for_qupath.txt`). 
 In this code snippets we show an example of mock data `unique(bind_data$PID)` with PIDs: `"A8759" "B36"   "B37", "B38", "B39"` and tissue `"Spleen", "p.wash", "Ascites", "Eye"``. You will have all the metadata in one go and also for drug combinations!
 
 > ⚠️ **WARNING**: As long as you keep the formatting as the above examples. 
 The dates should also be in the format **yyy-mm-dd**. For the combinations of two drugs they should be written together with each of the different drug capilized (**C**arboplatin**P**aclitaxel) and the rest lowercased letters. 
-For example **CarboplatinPaclitaxel_100_uM_10_nM**. This indicates a drug combination of Carboplatin 100_uM and Paclitaxel 10_nM. Each drug amount and each unit should always be separated by `_`. The first 100_uM belongs to the Carboplatin and the 10_nM belongs to the Paclitaxel. Those constrains are due to the parsing of the strings into useful metadata. If some of the data is not present, you can use a `.` separated by `_`. If you need additional data parsing, please let us know by filing an issue on GitLab [GitLab Issue]("https://git.scicore.unibas.ch/ovca-research/DRUGSENS/issues").
+For example **CarboplatinPaclitaxel_100_uM_10_nM**. This indicates a drug combination of Carboplatin 100_uM and Paclitaxel 10_nM. Each drug amount and each unit should always be separated by `_`. The first 100_uM belongs to the Carboplatin and the 10_nM belongs to the Paclitaxel. Those constrains are due to the parsing of the strings into useful metadata. If some of the data is not present, you can use a `.` separated by `_`. If you need additional data parsing, please let us know by filing an issue on GitLab [GitLab Issue]("https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues").
 
 ### Counting the number of positiive cells for each marker in every image
 This function will take the previous step's generated dataframe and it will counts image by image (sum the markers of every stack) for every sample the number of marker occurrences. 
@@ -247,7 +245,7 @@ get_QC_plots(plotting_ready_dataframe, save_plots = TRUE, isolate_a_specific_pat
 
 ## Run with user's data
 
-Let's run `DRUGSENS` with your data. `DRUGSENS` is not very strict about the capitalization of the file name but is very strict on the position of the parameters. This to avoid potential parsing problems. Here how the labeled data should look like in your QuPath generated file. Here below is shown a the first row from the file `A8759_drug1..conc2.csv` contained as example in `system.file("extdata/to_merge/", package = "DRUGSENS")`
+Let's run `drugsens` with your data. `drugsens` is not very strict about the capitalization of the file name but is very strict on the position of the parameters. This to avoid potential parsing problems. Here how the labeled data should look like in your QuPath generated file. Here below is shown a the first row from the file `A8759_drug1..conc2.csv` contained as example in `system.file("extdata/to_merge/", package = "drugsens")`
 
 ```         
 A8759_p.wash_2020.11.10_DOC2001.10.05_compoundX34542_10000_uM_EpCAM_Ecad_cCasp3_(series 01).tif
@@ -263,7 +261,7 @@ For example **CarboplatinPaclitaxel_100_uM_10_nM**. This indicates a drug combin
 
 ### Data Binding and Processing
 
-These lines sets stage for `DRUGSENS` to find the directory path where the microscopy image data are located. `defined_path` is a predefined variable that should contain the base path. This makes it easier to access and manage the files during processing. It is convenient also to define the `desired_file_extensions_of_the_files`, usually `csv` is a good start.
+These lines sets stage for `drugsens` to find the directory path where the microscopy image data are located. `defined_path` is a predefined variable that should contain the base path. This makes it easier to access and manage the files during processing. It is convenient also to define the `desired_file_extensions_of_the_files`, usually `csv` is a good start.
 
 ``` r
 defined_path <- "<USER_DEFINED_PATH>"
@@ -290,7 +288,7 @@ Each file is read, and additional metadata is extracted. This will return a data
 - `Concentration` = The amount of the drug treatment applied (concentration), quantitatively described.
 - `ConcentrationUnits` = The units in which the drug concentration is measured, such as micromolar (uM) or nanomolar (nM)
 - `ReplicaOrNot` = Indicates whether the sample is a replica or repeat of a previous experiment
-- `Name` = The standardized name of the cell markers as defined in the `config_DRUGSENS.txt` file. This ensures consistency and accuracy in identifying and referring to specific cell markers. 
+- `Name` = The standardized name of the cell markers as defined in the `config_drugsens.txt` file. This ensures consistency and accuracy in identifying and referring to specific cell markers. 
 
 
 ### A first QC plot
@@ -388,6 +386,6 @@ Renv will automatically activate and install the necessary packages as specified
 </details>
 
 ### Reporting Issues
-If you encounter any bugs or have suggestions for improvements, please file an issue using our [GitLab Issue]("https://git.scicore.unibas.ch/ovca-research/DRUGSENS/issues"). Be sure to include as much information as possible to help us understand and address the issue.
+If you encounter any bugs or have suggestions for improvements, please file an issue using our [GitLab Issue]("https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues"). Be sure to include as much information as possible to help us understand and address the issue.
 
 Please make sure to file the issue in the GitLab repo as this one in GitHub is a forward-only mirror repo.
