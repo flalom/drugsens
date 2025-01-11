@@ -53,3 +53,9 @@ A \code{list}/\code{NULL}.
 \description{
 This plot can show trends within the dataset and run some basic statistics.
 }
+\examples{
+\dontrun{
+  qc <- get_QC_plots_parsed_merged_data(bind_data, save_plots = TRUE,
+                                       save_list_of_plots = TRUE)
+}
+}

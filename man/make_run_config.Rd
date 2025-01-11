@@ -19,3 +19,8 @@ When this function run the first time, it will generated a config.txt file in th
 It will import the data config file into the use environment. This data will be used to change the column names
 of the imported dataset and change the name of the markers that is often incorrectly exported.
 }
+\examples{
+\dontrun{
+  make_run_config()
+}
+}

@@ -8,13 +8,15 @@
 #' @param folder_name A string indicating the name of the folder where to save the plots in case that save_plots = TRUE
 #' @param isolate_a_specific_patient A string indicating the patient name to isolate for single plot case (default is NULL)
 #' @param x_plot_var A string indicating the treatment's full name for the QC plots (default is "Treatment_complete")
-#'
 #' @import ggplot2
 #' @import ggpubr
 #' @importFrom dplyr filter
 #' @return A `dataframe`/`tibble`.
-#' @example
-#' \dontrun{get_QC_plots(longer_format_dataframe, patient_column_name = "PID", save_plots = TRUE, folder_name = "figures")}
+#' @examples
+#' \dontrun{
+#'   get_QC_plots(longer_format_dataframe, patient_column_name = "PID",
+#'                save_plots = TRUE, folder_name = "figures")
+#' }
 #' @export
 get_QC_plots <- function(.data,
                          patient_column_name = "PID",
@@ -33,7 +35,9 @@ get_QC_plots <- function(.data,
 
     QC_plot <- .data |>
       dplyr::filter(.data[[patient_column_name]] == i) |>
-      ggplot(aes(x = !!as.name(x_plot_var), y = marker_positivity_ratio, col = marker_positivity)) +
+      ggplot(aes(x = .data[[x_plot_var]],
+                 y = .data$marker_positivity_ratio,
+                 col = .data$marker_positivity)) +
       geom_boxplot(
         position = position_dodge(width = 1.0),
       ) +

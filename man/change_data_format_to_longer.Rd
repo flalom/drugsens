@@ -2,7 +2,7 @@
 % Please edit documentation in R/change_data_format_to_longer.R
 \name{change_data_format_to_longer}
 \alias{change_data_format_to_longer}
-\title{Reformat the counts data in longer format}
+\title{Data format changer}
 \usage{
 change_data_format_to_longer(
   .data,
@@ -26,7 +26,11 @@ A \code{dataframe}/\code{tibble}.
 \description{
 This function gets the count data data.frame, that has a wider format and it returns a longer-formatted data.frame
 }
+\details{
+Reformat the counts data in longer format
+}
 \examples{
+\dontrun{
 list_of_relabeling =list(  "PathCellObject" = "onlyDAPIPositve",
 "cCasp3" = "cCASP3",  "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
 "EpCAM_E-Cadherin" = "E-Cadherin",
@@ -36,4 +40,5 @@ system.file("extdata/to_merge/", package = "drugsens"))
 counts_dataframe <- make_count_dataframe(bind_data)
 plotting_ready_dataframe <-
 change_data_format_to_longer(counts_dataframe)
+}
 }

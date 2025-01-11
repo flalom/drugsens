@@ -1,11 +1,11 @@
 Package: drugsens
-Title: Automated Analysis of QuPath Output Data and Metadata Extraction
+Title: Automated Analysis of 'QuPath' Output Data and Metadata Extraction
 Description: A comprehensive toolkit for analyzing microscopy data output from
-    QuPath software. Provides functionality for automated data processing,
+    'QuPath' software. Provides functionality for automated data processing,
     metadata extraction, and statistical analysis of imaging results.
     Designed to complement the STAR Protocol Protocol for quantifying drug 
     sensitivity in 3D patient-derived ovarian cancer models 
-    10.1016/j.xpro.2024.103274.
+    <doi:10.1016/j.xpro.2024.103274>.
 Version: 0.1.0
 BugReports: https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues
 SystemRequirements: QuPath™ 4.0.0 or higher

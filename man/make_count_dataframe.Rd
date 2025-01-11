@@ -19,14 +19,25 @@ make_count_dataframe(
 }
 \value{
 A \code{dataframe}/\code{tibble}.
-
-text file
 }
 \description{
 This function counts every single marker present in the "Name" column of the data.frame and return a dataframe of the counts per marker
 }
 \examples{
-bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/", package = "drugsens"), files_extension_to_look_for = "csv")
+\dontrun{
+pkg_path <- system.file("extdata/to_merge/", package = "drugsens")
+bind_data <- data_binding(
+  path_to_the_projects_folder = pkg_path,
+  files_extension_to_look_for = "csv"
+)
 counts_dataframe <- make_count_dataframe(bind_data)
-plotting_ready_dataframe <- change_data_format_to_longer(counts_dataframe)
+plotting_ready_dataframe <- change_data_format_to_longer(
+  counts_dataframe
+)
+  make_count_dataframe(
+    data,
+    name_of_the_markers_column = "Name",
+    unique_name_row_identifier = "filter_image"
+  )
+}
 }

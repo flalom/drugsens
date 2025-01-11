@@ -39,10 +39,13 @@ test_that("list_all_files returns correct file paths", {
 
 })
 
-test_that("Check that the config.txt is made and that it can be read", {
-  expect_silent(make_run_config())
-  expect_silent(make_run_config())
-  expect_true(file.exists(path.expand(path = paste0(getwd(), "/config_drugsens.txt"))))
+test_that("Config creation and reading works", {
+  temp_dir <- tempdir()
+  on.exit(unlink(file.path(temp_dir, "config_drugsens.txt")))
+
+  make_run_config(forcePath = temp_dir)
+  make_run_config(forcePath = temp_dir)
+  expect_true(file.exists(file.path(temp_dir, "config_drugsens.txt")))
   expect_true(exists("list_of_relabeling"))
 })
 
@@ -61,6 +64,7 @@ test_that("Check that the drugs combination have two unit and two concentration 
 test_that("Config file was there and removed correctly", {
   expect_silent( file.remove(path.expand(paste0(getwd(), "/config_drugsens.txt"))) )
 })
+
 
 test_that("The parsing is working", {
   input_data <- data.frame(Image = "PID1_Tissue1_2024-02-13_DOC2024.02.13_TreatmentRana_10_uM_15_nm_Replica_(series.10)")

@@ -1,6 +1,7 @@
 #' Reformat the counts data in longer format
 #' @description
 #' This function gets the count data data.frame, that has a wider format and it returns a longer-formatted data.frame
+#' @title Data format changer
 #' @importFrom tidyr pivot_longer
 #' @importFrom dplyr select
 #' @importFrom tidyselect any_of
@@ -11,6 +12,7 @@
 #' @param unique_name_row_identifier String that indicates the unique identifier for each image, defaults as "filter_image"
 #' @export
 #' @examples
+#' \dontrun{
 #' list_of_relabeling =list(  "PathCellObject" = "onlyDAPIPositve",
 #' "cCasp3" = "cCASP3",  "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
 #' "EpCAM_E-Cadherin" = "E-Cadherin",
@@ -20,8 +22,7 @@
 #' counts_dataframe <- make_count_dataframe(bind_data)
 #' plotting_ready_dataframe <-
 #' change_data_format_to_longer(counts_dataframe)
-
-# adding the image number so to identify the distribution
+#' }
 
 # pivot_longer
 change_data_format_to_longer <- function(.data,

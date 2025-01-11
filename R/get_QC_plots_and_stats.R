@@ -16,14 +16,16 @@
 #' @param p_height Integer, indicate the plot's height (default is 10 inches)
 #' @param p_width Integer, indicate the plot's width (default is 10 inches)
 #' @param drug_column_name String, indicate the column indicating the Drug/Treament (default is "Treatment")
-#'
 #' @import ggplot2
 #' @import ggpubr
 #' @importFrom readr write_excel_csv
 #' @importFrom dplyr filter
 #' @return A `list`/`NULL`.
-#' @example
-#' \dontrun {qc <- get_QC_plots_parsed_merged_data(bind_data, save_plots = TRUE, save_list_of_plots = TRUE)}
+#' @examples
+#' \dontrun{
+#'   qc <- get_QC_plots_parsed_merged_data(bind_data, save_plots = TRUE,
+#'                                        save_list_of_plots = TRUE)
+#' }
 #' @export
 
 get_QC_plots_parsed_merged_data <- function(.data,

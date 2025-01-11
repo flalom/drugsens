@@ -208,7 +208,7 @@ In this code snippets we show an example of mock data `unique(bind_data$PID)` wi
 
 > ⚠️ **WARNING**: As long as you keep the formatting as the above examples. 
 The dates should also be in the format **yyy-mm-dd**. For the combinations of two drugs they should be written together with each of the different drug capilized (**C**arboplatin**P**aclitaxel) and the rest lowercased letters. 
-For example **CarboplatinPaclitaxel_100_uM_10_nM**. This indicates a drug combination of Carboplatin 100_uM and Paclitaxel 10_nM. Each drug amount and each unit should always be separated by `_`. The first 100_uM belongs to the Carboplatin and the 10_nM belongs to the Paclitaxel. Those constrains are due to the parsing of the strings into useful metadata. If some of the data is not present, you can use a `.` separated by `_`. If you need additional data parsing, please let us know by filing an issue on GitLab [GitLab Issue]("https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues").
+For example **CarboplatinPaclitaxel_100_uM_10_nM**. This indicates a drug combination of Carboplatin 100_uM and Paclitaxel 10_nM. Each drug amount and each unit should always be separated by `_`. The first 100_uM belongs to the Carboplatin and the 10_nM belongs to the Paclitaxel. Those constrains are due to the parsing of the strings into useful metadata. If some of the data is not present, you can use a `.` separated by `_`. If you need additional data parsing, please let us know by filing an issue on GitLab https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues.
 
 ### Counting the number of positiive cells for each marker in every image
 This function will take the previous step's generated dataframe and it will counts image by image (sum the markers of every stack) for every sample the number of marker occurrences. 
@@ -386,6 +386,6 @@ Renv will automatically activate and install the necessary packages as specified
 </details>
 
 ### Reporting Issues
-If you encounter any bugs or have suggestions for improvements, please file an issue using our [GitLab Issue]("https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues"). Be sure to include as much information as possible to help us understand and address the issue.
-
+If you encounter any bugs or have suggestions for improvements, please file an issue using our **GitLab Issue:** https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues. Be sure to include as much information as possible to help us understand and address the issue.
+**BugReports:** https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues
 Please make sure to file the issue in the GitLab repo as this one in GitHub is a forward-only mirror repo.

@@ -35,3 +35,9 @@ A \code{dataframe}/\code{tibble}.
 \description{
 Plot data to visualize immediate trends
 }
+\examples{
+\dontrun{
+  get_QC_plots(longer_format_dataframe, patient_column_name = "PID",
+               save_plots = TRUE, folder_name = "figures")
+}
+}

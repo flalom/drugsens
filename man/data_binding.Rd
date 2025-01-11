@@ -7,7 +7,8 @@
 data_binding(
   path_to_the_projects_folder,
   files_extension_to_look_for = "csv",
-  recursive_search = FALSE
+  recursive_search = FALSE,
+  forcePath = NULL
 )
 }
 \arguments{
@@ -16,18 +17,19 @@ data_binding(
 \item{files_extension_to_look_for}{String The extension of the file outputted from QuPath, (default is "csv")}
 
 \item{recursive_search}{Boolean, it defined the behavior of the file search, if recursive or not, (default is FALSE)}
+
+\item{forcePath}{String defining an alternative path to the confic file}
 }
 \value{
-A \code{dataframe}/\code{tibble}.
-
-Returns a concatenated dataframe from all the files within the indicated one
+A concatenated dataframe from all the files within the indicated path
 }
 \description{
-This function try to guess the string patterns that are in the dataset and then fill the dataframe
-with that information. Finally the data is combined and combined them into one file
+This function identifies string patterns in the dataset, fills the dataframe
+with that information, and combines all data into a single file
 }
 \examples{
+\dontrun{
 bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/",
-package = "drugsens"))
-#This will return the dataframe of all the data in the folder
+                         package = "drugsens"))
+}
 }

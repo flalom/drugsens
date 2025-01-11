@@ -1,3 +1,5 @@
+# In make_run_config.R:
+
 #' Generates and use a config txt file
 #' @description
 #' When this function run the first time, it will generated a config.txt file in the user working directory.
@@ -7,16 +9,18 @@
 #' @param forcePath String, Define a custom path for the config file
 #' @export
 #' @return A `dataframe`/`tibble`.
-#' @example
-#' \dontrun {make_run_config()}
+#' @examples
+#' \dontrun{
+#'   make_run_config()
+#' }
 make_run_config <- function(overwrite_config = FALSE, forcePath = NULL) {
+  currentPath <- if (is.null(forcePath)) getwd() else forcePath
+  config_file <- file.path(currentPath, "config_drugsens.txt")
 
-  if (is.null(forcePath)) currentPath <- getwd() else currentPath <- forcePath
-
-  if (file.exists("config_drugsens.txt")) {
+  if (file.exists(config_file)) {
     tryCatch(
       expr = {
-        source("config_drugsens.txt", local = FALSE)
+        source(config_file, local = FALSE)
       },
       error = function(error) {
         message("drugsens could not load the 'config.txt' file.
@@ -26,13 +30,9 @@ make_run_config <- function(overwrite_config = FALSE, forcePath = NULL) {
                 run_config to veryfy that the data was correctly read")
       }
     )
-  } else if (overwrite_config){
-    message("Overwriting config_drugsens.txt")
+  } else if (overwrite_config) {
     write(
-      x =
-        (
-        '
-        # List of markers to relabel
+      x = '# List of markers to relabel
         list_of_relabeling =
         list(
             "PathCellObject" = "onlyDAPIPositve",
@@ -40,17 +40,12 @@ make_run_config <- function(overwrite_config = FALSE, forcePath = NULL) {
             "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
             "EpCAM_E-Cadherin" = "E-Cadherin",
             "EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3"
-          )'
-        ),
-      file = paste0(path.expand(currentPath), "/config_drugsens.txt")
+          )',
+      file = config_file
     )
-    message("config_drugsens.txt has been overwritten correctly.")
   } else {
     write(
-      x =
-        (
-          '
-        # List of markers to relabel
+      x = '# List of markers to relabel
         list_of_relabeling =
         list(
             "PathCellObject" = "onlyDAPIPositve",
@@ -58,9 +53,8 @@ make_run_config <- function(overwrite_config = FALSE, forcePath = NULL) {
             "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
             "EpCAM_E-Cadherin" = "E-Cadherin",
             "EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3"
-          )'
-        ),
-      file = paste0(path.expand(currentPath), "/config_drugsens.txt")
+          )',
+      file = config_file
     )
   }
 }

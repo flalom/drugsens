@@ -8,3 +8,5 @@
 *.html
 figures/**
 temp/**
+.DS_Store
+*.txt

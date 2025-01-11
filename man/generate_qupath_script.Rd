@@ -14,5 +14,7 @@ Generate a useful script to consistently save the output data from QuPath in .cs
 followed during the package development.
 }
 \examples{
-generate_qupath_script()
+\dontrun{
+  generate_qupath_script()
+}
 }

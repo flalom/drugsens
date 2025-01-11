@@ -5,3 +5,7 @@
 ^\.github$
 ^LICENSE\.md$
 ^cran-comments\.md$
+^config_drugsens\.txt$
+^script_for_qupath\.txt$
+^assets$
+^CRAN-SUBMISSION$

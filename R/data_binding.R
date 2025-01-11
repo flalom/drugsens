@@ -1,19 +1,12 @@
 # Get a list of all the files that are in a user-specified folder and get a list of full paths
+#' Internal utility functions for file handling
+#' @name utils_internal
 #' @description
-#' This function lists the content of a selected folder either recursively or not
+#' This file contains internal utility functions for file handling and processing
 #' @keywords internal
-#' @returns list
-#' @name   "Name", "list_of_relabeling", "marker_positivity","marker_positivity_ratio", "x", "y"
 #' @importFrom utils read.csv
 #' @importFrom stats setNames
 #' @import roxygen2
-#'
-
-# important for the scripts
-globalVariables(c(
-  "Name", "list_of_relabeling", "marker_positivity",
-  "marker_positivity_ratio", "x", "y"
-))
 
 # list all the files
 list_all_files <- function(define_path, extension, recursive_search) {
@@ -33,13 +26,14 @@ list_all_files <- function(define_path, extension, recursive_search) {
   )
 }
 
-# Helper function to read and process a single file
-#' @description
-#' This function returns a processed single file
+# Process a Single File
+#' @title Process a Single File
+#' @name process_file
+#' @description This function returns a processed single file
 #' @param file_path Path to the file
 #' @param extension String File extension to filter
 #' @keywords internal
-#' @returns dataframe
+#' @return dataframe
 process_file <- function(file_path,
                          # relabeling_map,
                          extension) {
@@ -85,27 +79,31 @@ process_file <- function(file_path,
 }
 
 #' Merge all the dataframes coming out from the QuPath
+#' @name data_binding
 #' @description
-#' This function try to guess the string patterns that are in the dataset and then fill the dataframe
-#' with that information. Finally the data is combined and combined them into one file
+#' This function identifies string patterns in the dataset, fills the dataframe
+#' with that information, and combines all data into a single file
 #' @import knitr
 #' @importFrom stringr str_extract
-#' @return A `dataframe`/`tibble`.
 #' @param path_to_the_projects_folder String/Path The path where the files coming out of QuPath are located
 #' @param files_extension_to_look_for String The extension of the file outputted from QuPath, (default is "csv")
 #' @param recursive_search Boolean, it defined the behavior of the file search, if recursive or not, (default is FALSE)
-#' @returns Returns a concatenated dataframe from all the files within the indicated one
+#' @param forcePath String defining an alternative path to the confic file
+#' @return A concatenated dataframe from all the files within the indicated path
 #' @export
 #' @examples
+#' \dontrun{
 #' bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/",
-#' package = "drugsens"))
-#' #This will return the dataframe of all the data in the folder
+#'                          package = "drugsens"))
+#'}
+
 # Main function to bind data from multiple files
 data_binding <- function(path_to_the_projects_folder,
                          files_extension_to_look_for = "csv",
-                         recursive_search = FALSE) {
+                         recursive_search = FALSE,
+                         forcePath = NULL) {
   # run configuration file
-  make_run_config()
+  make_run_config(forcePath = forcePath)
 
   # Validate input parameters
   if (!dir.exists(path_to_the_projects_folder)) {
