@@ -20,7 +20,7 @@ The metadata will be then associated to the count file as well
 input_data <- data.frame(
   Image = "B516_Ascites_2023-11-25_DOC2020-12-14_dmso_rep_Ecad_cCasp3_(series 01).tif"
 )
-test <- drugsens:::string_parsing(input_data)
+test <- drugsens::string_parsing(input_data)
 \dontrun{
   data.parsed <- string_parsing(.data)
 }

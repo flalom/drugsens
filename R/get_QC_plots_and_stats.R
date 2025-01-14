@@ -24,7 +24,7 @@
 #' @examples
 #' \dontrun{
 #'   qc <- get_QC_plots_parsed_merged_data(bind_data, save_plots = TRUE,
-#'                                        save_list_of_plots = TRUE)
+#'                                        save_list_of_plots = FALSE)
 #' }
 #' @export
 
@@ -64,8 +64,8 @@ get_QC_plots_parsed_merged_data <- function(.data,
       if (!is.null(isolate_specific_drug)) subset_data <- subset_data[subset_data[[drug_column_name]] %in% isolate_specific_drug, ]
 
       if (nrow(subset_data) < 1) {
-        print(unique(subset_data[[PID_column_name]]))
-        print(unique(subset_data[[drug_column_name]]))
+        message(unique(subset_data[[PID_column_name]]))
+        message(unique(subset_data[[drug_column_name]]))
         stop("ERROR: Your filtering query has returned no observations")
       }
 

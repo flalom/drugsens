@@ -8,11 +8,12 @@
 #' @importFrom stringr str_count
 #' @return A `dataframe`/`tibble`.
 #' @param .data dataframe with parsed metadata
+#' @export
 #' @examples
 #' input_data <- data.frame(
 #'   Image = "B516_Ascites_2023-11-25_DOC2020-12-14_dmso_rep_Ecad_cCasp3_(series 01).tif"
 #' )
-#' test <- drugsens:::string_parsing(input_data)
+#' test <- drugsens::string_parsing(input_data)
 #' \dontrun{
 #'   data.parsed <- string_parsing(.data)
 #' }

@@ -82,7 +82,7 @@ test_that("The parsing is working", {
                                 ConcentrationUnits1 = "uM",
                                 ConcentrationUnits2 = "nm",
                                 Treatment_complete = "TreatmentRana10uM-15nm")
-  expect_equal(drugsens:::string_parsing(input_data), expected = expected_output)
+  expect_equal(drugsens::string_parsing(input_data), expected = expected_output)
 })
 
 test_that("Another parsing test", {
@@ -101,7 +101,7 @@ test_that("Another parsing test", {
     ConcentrationUnits1 = NA_character_,
     ConcentrationUnits2 = NA_character_,
     Treatment_complete = "dmso")
-  expect_equal(drugsens:::string_parsing(input_data), expected = expected_output)
+  expect_equal(drugsens::string_parsing(input_data), expected = expected_output)
   #   Image1 <- "B516_Ascites_2023-11-25_DOC2020-12-14_CarboplatinPaclitaxel_100_uM_10_nM_Ecad_cCasp3_(series 01).tif"
   #   Image2 <- "A8759_Spleen_2020.11.10_DOC2001.10.05_compoundX34542_1000_uM_EpCAM_Ecad_cCasp3_(series 01).tif"
   #   Image3 <- "A8759_Spleen_2020.11.10_DOC2001.10.05_compoundX34542_1000_uM_EpCAM_Ecad_cCasp3_(series 01).tif"
