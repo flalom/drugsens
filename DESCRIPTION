@@ -10,7 +10,7 @@ Version: 0.1.0
 BugReports: https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues
 SystemRequirements: QuPath™ 4.0.0 or higher
 Authors@R: c(
-    person("Flavio", "Lombardo", , "flavio.lombardo@unibas.ch", role = c("aut", "cre", "cph")),
+    person("Flavio", "Lombardo", , "flavio.lombardo@unibas.ch", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-4853-6838")),
     person("Ricardo Coelho", role = c("cph")),   
     person("Ovarian Cancer Research", role = c("cph")),   
     person("University of Basel and University Hospital Basel", role = c("cph"))   
@@ -19,16 +19,16 @@ URL: https://git.scicore.unibas.ch/ovca-research/drugsens/
 Maintainer: Flavio Lombardo <flavio.lombardo@unibas.ch>
 License: MIT + file LICENSE
 Imports:
-    utils,
     dplyr,
-    tidyr,
-    readr,
-    stringr,
-    knitr,
     ggplot2,
     ggpubr,
+    knitr,
     roxygen2,
+    stats,
+    stringr,
+    tidyr,
     tidyselect,
+    utils,
     testthat (>= 3.0.0)
 Depends: 
     R (>= 4.2)

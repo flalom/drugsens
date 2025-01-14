@@ -2,13 +2,24 @@
 #' @description
 #' Generate a useful script to consistently save the output data from QuPath in .csv format following the naming conventions
 #' followed during the package development.
-#' @return `script_for_qupath.txt` in local working directory.
+#' @param output_dir Directory where the script should be saved. If NULL, uses tempdir()
+#' @return Invisibly returns the path to the generated script file.
 #' @export
 #' @examples
 #' \dontrun{
+#'   # Generate script in a temporary directory
 #'   generate_qupath_script()
+#'
+#'   # Generate script in a specific directory
+#'   output_dir <- tempdir()
+#'   generate_qupath_script(output_dir = output_dir)
 #' }
-generate_qupath_script <- function() {
+generate_qupath_script <- function(output_dir = NULL) {
+  if(is.null(output_dir)) {
+    output_dir <- tempdir()
+  }
+  output_file <- file.path(output_dir, "script_for_qupath.txt")
+
   write(
     x = paste0('
 //This code script was tested with QuPath 4
@@ -53,9 +64,9 @@ def exporter  = new MeasurementExporter()
 
 print "Done!"
       '),
-    file = paste0(path.expand(getwd()), "/script_for_qupath.txt")
+    file = output_file
   )
   message("You can now take the script and personalize it to your needs")
-  message(paste0(Sys.time(), " The script file was generated here: ", getwd(), "/"))
+  message(paste0(Sys.time(), " The script file was generated here: ", output_file, "/"))
   message(paste0(Sys.time(), " Please make sure to follow the name convention here proposed, or it might fail to get all the information"))
 }

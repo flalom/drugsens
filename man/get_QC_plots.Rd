@@ -9,35 +9,57 @@ get_QC_plots(
   patient_column_name = "PID",
   colors = c("darkgreen", "red", "orange", "pink"),
   save_plots = FALSE,
-  folder_name = "figures",
+  folder_name = NULL,
   x_plot_var = "Treatment_complete",
   isolate_a_specific_patient = NULL
 )
 }
 \arguments{
-\item{.data}{The preprocessed data (after running make_count_dataframe() and change_data_format_to_longer()) merged data.frame that should be visualized}
+\item{.data}{The preprocessed data (after running make_count_dataframe() and change_data_format_to_longer())
+merged data.frame that should be visualized}
 
 \item{patient_column_name}{The PID's column name in the merged data.frame (defaults to "PID")}
 
-\item{colors}{A list of colors to supply to personalize the plot, as default 4 colors c("dark green", "red", "orange", "pink")}
+\item{colors}{A list of colors to supply to personalize the plot, defaults to c("darkgreen", "red", "orange", "pink")}
 
-\item{save_plots}{A Boolean value indicating if the plots should be saved or not, TRUE for saving in the current working directory, FALSE to not. Default is FALSE}
+\item{save_plots}{A Boolean value indicating if the plots should be saved or not (default is FALSE)}
 
-\item{folder_name}{A string indicating the name of the folder where to save the plots in case that save_plots = TRUE}
+\item{folder_name}{A string indicating the name of the folder where to save the plots if save_plots is TRUE}
 
 \item{x_plot_var}{A string indicating the treatment's full name for the QC plots (default is "Treatment_complete")}
 
 \item{isolate_a_specific_patient}{A string indicating the patient name to isolate for single plot case (default is NULL)}
 }
 \value{
-A \code{dataframe}/\code{tibble}.
+Invisibly returns NULL, but saves plots to disk if save_plots is TRUE
 }
 \description{
-Plot data to visualize immediate trends
+Plot data to visualize immediate trends. This function expects data that has been processed
+through make_count_dataframe() and change_data_format_to_longer() to ensure the correct
+data structure for plotting.
 }
 \examples{
 \dontrun{
-  get_QC_plots(longer_format_dataframe, patient_column_name = "PID",
-               save_plots = TRUE, folder_name = "figures")
+# First process example data
+example_path <- system.file("extdata/to_merge/", package = "drugsens")
+raw_data <- data_binding(path_to_the_projects_folder = example_path)
+count_data <- make_count_dataframe(raw_data)
+processed_data <- change_data_format_to_longer(count_data)
+
+# Create and save plots to temporary directory
+temp_dir <- file.path(tempdir(), "qc_plots")
+get_QC_plots(
+  processed_data,
+  save_plots = TRUE,
+  folder_name = temp_dir
+)
+
+# Create plots for a specific patient
+get_QC_plots(
+  processed_data,
+  isolate_a_specific_patient = "B39",
+  save_plots = TRUE,
+  folder_name = temp_dir
+)
 }
 }

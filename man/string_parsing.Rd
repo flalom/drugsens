@@ -2,7 +2,7 @@
 % Please edit documentation in R/parsers.R
 \name{string_parsing}
 \alias{string_parsing}
-\title{Main parsing function}
+\title{Parse image filenames to extract metadata}
 \usage{
 string_parsing(.data)
 }

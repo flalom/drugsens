@@ -34,7 +34,6 @@ counts_dataframe <- make_count_dataframe(bind_data)
 plotting_ready_dataframe <- change_data_format_to_longer(
   counts_dataframe
 )
-  make_count_dataframe(
     data,
     name_of_the_markers_column = "Name",
     unique_name_row_identifier = "filter_image"

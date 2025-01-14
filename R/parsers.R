@@ -1,4 +1,4 @@
-#' Main parsing function
+#' @title Parse image filenames to extract metadata
 #' @description
 #' This function will parse the data from the Image name and will return the metadata there contained
 #' The metadata will be then associated to the count file as well

@@ -14,7 +14,8 @@
 #'   make_run_config()
 #' }
 make_run_config <- function(overwrite_config = FALSE, forcePath = NULL) {
-  currentPath <- if (is.null(forcePath)) getwd() else forcePath
+
+  currentPath <- if (is.null(forcePath)) tempdir() else forcePath
   config_file <- file.path(currentPath, "config_drugsens.txt")
 
   if (file.exists(config_file)) {

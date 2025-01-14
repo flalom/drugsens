@@ -2,13 +2,13 @@
 % Please edit documentation in R/get_QC_plots_and_stats.R
 \name{get_QC_plots_parsed_merged_data}
 \alias{get_QC_plots_parsed_merged_data}
-\title{Plot some QC plots for the bound data}
+\title{Plot QC plots and calculate statistics for bound data}
 \usage{
 get_QC_plots_parsed_merged_data(
   .data,
   list_of_columns_to_plot = NULL,
   save_plots = FALSE,
-  saving_plots_folder = "figures",
+  saving_plots_folder = NULL,
   save_plots_in_patient_specific_subfolders = TRUE,
   fill_color_variable = NULL,
   PID_column_name = "PID",
@@ -17,45 +17,75 @@ get_QC_plots_parsed_merged_data(
   drug_column_name = "Treatment",
   save_list_of_plots = TRUE,
   p_height = 10,
-  p_width = 10
+  p_width = 10,
+  verbose = TRUE
 )
 }
 \arguments{
-\item{.data}{The preprocessed data (after running make_count_dataframe() and change_data_format_to_longer()) merged data.frame that should be visualized}
+\item{.data}{The preprocessed data frame to analyze}
 
-\item{list_of_columns_to_plot}{The preprocessed data (after running make_count_dataframe() and change_data_format_to_longer()) merged data.frame that should be visualized}
+\item{list_of_columns_to_plot}{Columns to include in plots. If NULL, all numeric columns are used.}
 
-\item{save_plots}{Boolean, TRUE if plots should be saved (default is FALSE)}
+\item{save_plots}{Logical, whether to save plots to files. Defaults to FALSE.}
 
-\item{saving_plots_folder}{String indicating the folder where the plots should be stored (default is "figures")}
+\item{saving_plots_folder}{Directory for saving plots. If NULL and save_plots=TRUE, uses a subdirectory of tempdir().}
 
-\item{save_plots_in_patient_specific_subfolders}{Boolean, if TRUE the plots will be saved (if \code{save_plots} TRUE) in sample specific folders (default is TRUE)}
+\item{save_plots_in_patient_specific_subfolders}{Logical, whether to create patient subdirectories. Defaults to TRUE.}
 
-\item{fill_color_variable}{Boolean, String, indicating the name of the variable (discrete) to use for the plot's filling}
+\item{fill_color_variable}{Variable name for plot color filling}
 
-\item{PID_column_name}{String, indicating the name of the sample to subset (default is "Treatment")}
+\item{PID_column_name}{Column name for patient IDs. Defaults to "PID".}
 
-\item{isolate_specific_drug}{String, indicating if there should be a Treatment specific data subset (default is NULL)}
+\item{isolate_specific_drug}{Drug name to subset data}
 
-\item{isolate_specific_patient}{String, indicating a spacific sample to plot only (default is NULL)}
+\item{isolate_specific_patient}{Patient ID to subset data}
 
-\item{drug_column_name}{String, indicate the column indicating the Drug/Treament (default is "Treatment")}
+\item{drug_column_name}{Column name for drug information. Defaults to "Treatment".}
 
-\item{save_list_of_plots}{Boolean, if TRUE returns a named list of all the plots ran (default is TRUE), this can be usefult to isolate specific plots}
+\item{save_list_of_plots}{Logical, whether to return list of plot objects. Defaults to TRUE.}
 
-\item{p_height}{Integer, indicate the plot's height (default is 10 inches)}
+\item{p_height}{Plot height in inches. Defaults to 10.}
 
-\item{p_width}{Integer, indicate the plot's width (default is 10 inches)}
+\item{p_width}{Plot width in inches. Defaults to 10.}
+
+\item{verbose}{Logical, whether to show progress messages. Defaults to TRUE.}
 }
 \value{
-A \code{list}/\code{NULL}.
+If save_list_of_plots=TRUE, returns a named list of ggplot objects. Otherwise returns invisible(NULL).
 }
 \description{
-This plot can show trends within the dataset and run some basic statistics.
+This function creates quality control plots and calculates basic statistics for microscopy data.
+The plots provide visual insights into marker expression patterns and data quality.
 }
 \examples{
 \dontrun{
-  qc <- get_QC_plots_parsed_merged_data(bind_data, save_plots = TRUE,
-                                       save_list_of_plots = FALSE)
+# First load and process example data
+example_path <- system.file("extdata/to_merge/", package = "drugsens")
+raw_data <- data_binding(path_to_the_projects_folder = example_path)
+count_data <- make_count_dataframe(raw_data)
+processed_data <- change_data_format_to_longer(count_data)
+
+# Basic usage - create plots for all patients
+plots <- get_QC_plots_parsed_merged_data(processed_data)
+
+# Save plots to a temporary directory
+temp_dir <- file.path(tempdir(), "qc_plots")
+plots <- get_QC_plots_parsed_merged_data(
+  processed_data,
+  save_plots = TRUE,
+  saving_plots_folder = temp_dir
+)
+
+# Focus on a specific patient
+plots <- get_QC_plots_parsed_merged_data(
+  processed_data,
+  isolate_specific_patient = "B39"
+)
+
+# Color plots by tissue type
+plots <- get_QC_plots_parsed_merged_data(
+  processed_data,
+  fill_color_variable = "Tissue"
+)
 }
 }
