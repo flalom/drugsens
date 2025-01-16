@@ -1,4 +1,6 @@
 ![](https://img.shields.io/badge/R-%3E%3D%204.0.0-blue)
+![](https://www.r-pkg.org/badges/version/drugsens)
+
 
 # Overview
 
@@ -10,6 +12,10 @@ This package is complementary to the STAR protocol: [*Protocol for quantifying d
 # Installation
 
 ``` r
+Install from CRAN
+install.packages("drugsens")
+
+# Or for the latest changes:
 devtools::install_git("https://git.scicore.unibas.ch/ovca-research/drugsens")
 # OR
 devtools::install_github("https://github.com/flalom/drugsens") # this is the GitLab's mirroring repo

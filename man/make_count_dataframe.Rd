@@ -24,19 +24,27 @@ A \code{dataframe}/\code{tibble}.
 This function counts every single marker present in the "Name" column of the data.frame and return a dataframe of the counts per marker
 }
 \examples{
-\dontrun{
+\donttest{
+# First load example data
 pkg_path <- system.file("extdata/to_merge/", package = "drugsens")
 bind_data <- data_binding(
   path_to_the_projects_folder = pkg_path,
   files_extension_to_look_for = "csv"
 )
+
+# Process the data
 counts_dataframe <- make_count_dataframe(bind_data)
-plotting_ready_dataframe <- change_data_format_to_longer(
-  counts_dataframe
+
+# Convert to plotting format
+plotting_ready_dataframe <- change_data_format_to_longer(counts_dataframe)
+}
+
+\donttest{
+# Example with custom parameters
+make_count_dataframe(
+  bind_data,
+  name_of_the_markers_column = "Name",
+  unique_name_row_identifier = "filter_image"
 )
-    data,
-    name_of_the_markers_column = "Name",
-    unique_name_row_identifier = "filter_image"
-  )
 }
 }

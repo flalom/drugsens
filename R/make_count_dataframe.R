@@ -8,21 +8,28 @@
 #' @param name_of_the_markers_column The name of the column of the .data where the marker names are expressed (ie E-Caderin, DAPI), "Defaults as Name"
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' # First load example data
 #' pkg_path <- system.file("extdata/to_merge/", package = "drugsens")
 #' bind_data <- data_binding(
 #'   path_to_the_projects_folder = pkg_path,
 #'   files_extension_to_look_for = "csv"
 #' )
+#'
+#' # Process the data
 #' counts_dataframe <- make_count_dataframe(bind_data)
-#' plotting_ready_dataframe <- change_data_format_to_longer(
-#'   counts_dataframe
+#'
+#' # Convert to plotting format
+#' plotting_ready_dataframe <- change_data_format_to_longer(counts_dataframe)
+#' }
+#'
+#' \donttest{
+#' # Example with custom parameters
+#' make_count_dataframe(
+#'   bind_data,
+#'   name_of_the_markers_column = "Name",
+#'   unique_name_row_identifier = "filter_image"
 #' )
-#   make_count_dataframe(
-#'     data,
-#'     name_of_the_markers_column = "Name",
-#'     unique_name_row_identifier = "filter_image"
-#'   )
 #' }
 
 # adding the image number so to identify the distribution

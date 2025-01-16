@@ -39,7 +39,7 @@ through make_count_dataframe() and change_data_format_to_longer() to ensure the 
 data structure for plotting.
 }
 \examples{
-\dontrun{
+\donttest{
 # First process example data
 example_path <- system.file("extdata/to_merge/", package = "drugsens")
 raw_data <- data_binding(path_to_the_projects_folder = example_path)

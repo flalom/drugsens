@@ -16,7 +16,7 @@
 #' @importFrom dplyr filter
 #' @return Invisibly returns NULL, but saves plots to disk if save_plots is TRUE
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # First process example data
 #' example_path <- system.file("extdata/to_merge/", package = "drugsens")
 #' raw_data <- data_binding(path_to_the_projects_folder = example_path)

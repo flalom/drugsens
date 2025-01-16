@@ -12,16 +12,24 @@
 #' @param unique_name_row_identifier String that indicates the unique identifier for each image, defaults as "filter_image"
 #' @export
 #' @examples
-#' \dontrun{
-#' list_of_relabeling =list(  "PathCellObject" = "onlyDAPIPositve",
-#' "cCasp3" = "cCASP3",  "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
-#' "EpCAM_E-Cadherin" = "E-Cadherin",
-#' "EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3")
-#' bind_data <- data_binding(path_to_the_projects_folder =
-#' system.file("extdata/to_merge/", package = "drugsens"))
+#' \donttest{
+#' # Set up relabeling list
+#' list_of_relabeling <- list(
+#'   "PathCellObject" = "onlyDAPIPositve",
+#'   "cCasp3" = "cCASP3",
+#'   "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
+#'   "EpCAM_E-Cadherin" = "E-Cadherin",
+#'   "EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3"
+#' )
+#'
+#' # Load and process example data
+#' bind_data <- data_binding(
+#'   path_to_the_projects_folder = system.file("extdata/to_merge/", package = "drugsens")
+#' )
 #' counts_dataframe <- make_count_dataframe(bind_data)
-#' plotting_ready_dataframe <-
-#' change_data_format_to_longer(counts_dataframe)
+#'
+#' # Convert to long format
+#' plotting_ready_dataframe <- change_data_format_to_longer(counts_dataframe)
 #' }
 
 # pivot_longer

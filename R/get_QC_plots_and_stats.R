@@ -20,7 +20,7 @@
 #' @importFrom ggplot2 ggplot aes geom_violin geom_boxplot facet_wrap theme element_text labs
 #'             geom_jitter position_jitter stat_summary aes_string
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # First load and process example data
 #' example_path <- system.file("extdata/to_merge/", package = "drugsens")
 #' raw_data <- data_binding(path_to_the_projects_folder = example_path)

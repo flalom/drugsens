@@ -58,7 +58,7 @@ This function creates quality control plots and calculates basic statistics for 
 The plots provide visual insights into marker expression patterns and data quality.
 }
 \examples{
-\dontrun{
+\donttest{
 # First load and process example data
 example_path <- system.file("extdata/to_merge/", package = "drugsens")
 raw_data <- data_binding(path_to_the_projects_folder = example_path)

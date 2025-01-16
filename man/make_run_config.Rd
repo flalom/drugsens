@@ -20,7 +20,8 @@ It will import the data config file into the use environment. This data will be 
 of the imported dataset and change the name of the markers that is often incorrectly exported.
 }
 \examples{
-\dontrun{
-  make_run_config()
+\donttest{
+# Generate config in temporary directory
+make_run_config(forcePath = tempdir())
 }
 }

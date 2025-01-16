@@ -1,5 +1,3 @@
-# In make_run_config.R:
-
 #' Generates and use a config txt file
 #' @description
 #' When this function run the first time, it will generated a config.txt file in the user working directory.
@@ -10,8 +8,9 @@
 #' @export
 #' @return A `dataframe`/`tibble`.
 #' @examples
-#' \dontrun{
-#'   make_run_config()
+#' \donttest{
+#' # Generate config in temporary directory
+#' make_run_config(forcePath = tempdir())
 #' }
 make_run_config <- function(overwrite_config = FALSE, forcePath = NULL) {
 

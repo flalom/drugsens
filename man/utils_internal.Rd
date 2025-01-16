@@ -10,4 +10,12 @@ list_all_files(define_path, extension, recursive_search)
 \description{
 This file contains internal utility functions for file handling and processing
 }
+\examples{
+\donttest{
+# Load example data from package
+bind_data <- data_binding(
+  path_to_the_projects_folder = system.file("extdata/to_merge/", package = "drugsens")
+)
+}
+}
 \keyword{internal}
