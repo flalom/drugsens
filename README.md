@@ -1,5 +1,6 @@
 ![](https://img.shields.io/badge/R-%3E%3D%204.0.0-blue)
 ![](https://www.r-pkg.org/badges/version/drugsens)
+[![DOI](https://zenodo.org/badge/751272301.svg)](https://doi.org/10.5281/zenodo.14747762)
 
 
 # Overview
