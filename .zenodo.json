@@ -1,0 +1,56 @@
+{
+  "title": "drugsens: Automated Analysis of QuPath Output Data and Metadata Extraction",
+  "description": "A comprehensive R package for analyzing microscopy data output from QuPath software, specifically designed for drug sensitivity analysis in patient-derived cancer models. The package implements the methodology described in Labrosse et al. (2024) for quantifying drug sensitivity in 3D patient-derived ovarian cancer models.",
+  "upload_type": "software",
+  "publication_date": "2024-01-27",
+  "version": "0.1.0",
+  "language": "eng",
+  "keywords": [
+    "R",
+    "image-analysis",
+    "microscopy",
+    "QuPath",
+    "drug-sensitivity",
+    "cancer-research",
+    "ovarian-cancer",
+    "patient-derived-models",
+    "bioinformatics",
+    "data-analysis"
+  ],
+  "license": "MIT",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Lombardo, Flavio",
+      "affiliation": "University of Basel & University Hospital Basel",
+      "orcid": "0000-0002-4853-6838"
+    }
+  ],
+  "contributors": [
+    {
+      "name": "Coelho, Ricardo",
+      "type": "Researcher",
+      "affiliation": "University of Basel & University Hospital Basel"
+    }
+  ],
+  "references": [
+    "Labrosse et al. (2024). Protocol for quantifying drug sensitivity in 3D patient-derived ovarian cancer models. STAR Protocols. doi:10.1016/j.xpro.2024.103274"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.1016/j.xpro.2024.103274",
+      "relation": "isImplementedBy",
+      "resource_type": "publication-article"
+    },
+    {
+      "identifier": "https://CRAN.R-project.org/package=drugsens",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    }
+  ],
+  "communities": [
+    {
+      "identifier": "ovarian-cancer-research"
+    }
+  ]
+}
