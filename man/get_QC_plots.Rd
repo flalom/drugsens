@@ -7,7 +7,7 @@
 get_QC_plots(
   .data,
   patient_column_name = "PID",
-  colors = c("darkgreen", "red", "orange", "pink"),
+  colors = unname(drugsens_palette[c("blue", "orange", "aqua", "yellow")]),
   save_plots = FALSE,
   folder_name = NULL,
   x_plot_var = "Treatment_complete",
@@ -20,7 +20,8 @@ merged data.frame that should be visualized}
 
 \item{patient_column_name}{The PID's column name in the merged data.frame (defaults to "PID")}
 
-\item{colors}{A list of colors to supply to personalize the plot, defaults to c("darkgreen", "red", "orange", "pink")}
+\item{colors}{A list of colors to supply to personalize the plot, defaults to a
+colorblind-safe 4-hue set (blue, orange, aqua, yellow)}
 
 \item{save_plots}{A Boolean value indicating if the plots should be saved or not (default is FALSE)}
 

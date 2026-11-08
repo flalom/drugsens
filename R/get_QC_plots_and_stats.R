@@ -71,31 +71,37 @@ get_QC_plots_parsed_merged_data <- function(.data,
     p <- ggplot2::ggplot(data, ggplot2::aes(x = marker_positivity, y = unlist(data[[metric]])))
 
     if (!is.null(fill_var)) {
+      n_levels <- length(unique(data[[fill_var]]))
       p <- p + ggplot2::geom_violin(trim = FALSE,
                                     ggplot2::aes_string(fill = fill_var),
-                                    color = NA)
+                                    color = NA, alpha = 0.85) +
+        drugsens_scale("fill", n_levels)
     } else {
       p <- p + ggplot2::geom_violin(trim = FALSE,
-                                    fill = "#A4A4A4",
-                                    color = "darkred")
+                                    fill = unname(drugsens_palette["blue"]),
+                                    color = NA, alpha = 0.85)
     }
 
     p <- p +
-      theme_minimal() +
-      ggplot2::geom_boxplot(width = 0.1, fill = "white") +
-      ggplot2::facet_wrap(~Treatment) +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
+      drugsens_theme() +
+      ggplot2::geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +
+      ggplot2::facet_wrap(~Treatment, labeller = drugsens_wrap_labeller(18)) +
+      ggplot2::scale_x_discrete(labels = function(x) drugsens_wrap_text(x, 9)) +
+      ggplot2::theme(
+        axis.text.x = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(0.72)),
+        panel.grid.major.x = ggplot2::element_blank()
+      ) +
       ggplot2::labs(
         title = metric,
         x = "Cell Markers",
         y = paste0("Intensity of ", metric, " (log2)"),
         subtitle = paste0(pid, ".", drug)
       ) +
-      ggplot2::geom_jitter(shape = 16,
+      ggplot2::geom_jitter(shape = 16, alpha = 0.4, size = 1,
                            position = ggplot2::position_jitter(0.01)) +
       ggplot2::stat_summary(geom = "crossbar",
                             fun = mean,
-                            colour = "red",
+                            colour = unname(drugsens_palette["red"]),
                             width = 0.21)
 
     return(p)

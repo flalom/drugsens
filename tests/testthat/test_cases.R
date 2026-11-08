@@ -90,6 +90,206 @@ test_that("String parsing works correctly for single drug", {
   expect_equal(result$Treatment_complete, "TreatmentRana10uM-15nm")
 })
 
+test_that("make_count_dataframe returns ratio and grouping columns", {
+  list_of_relabeling <- list("PathCellObject" = "onlyDAPIPositve")
+  bind_data <- drugsens::data_binding(
+    path_to_the_projects_folder = system.file("extdata/to_merge/", package = "drugsens")
+  )
+  counts <- drugsens::make_count_dataframe(bind_data)
+
+  expect_true("sum_cells" %in% colnames(counts))
+  expect_true(any(grepl("_ratio_of_total_cells$", colnames(counts))))
+  expect_true(all(c("PID", "Treatment", "Concentration1") %in% colnames(counts)))
+  expect_true("Control" %in% counts$Treatment)
+})
+
+test_that("change_data_format_to_longer pivots ratio columns", {
+  list_of_relabeling <- list("PathCellObject" = "onlyDAPIPositve")
+  bind_data <- drugsens::data_binding(
+    path_to_the_projects_folder = system.file("extdata/to_merge/", package = "drugsens")
+  )
+  counts <- drugsens::make_count_dataframe(bind_data)
+  longer <- drugsens::change_data_format_to_longer(counts)
+
+  expect_true(all(c("marker_positivity", "marker_positivity_ratio") %in% colnames(longer)))
+  n_ratio_cols <- sum(grepl("_ratio_of_total_cells$", colnames(counts)))
+  expect_equal(nrow(longer), nrow(counts) * n_ratio_cols)
+})
+
+test_that("normalize_to_control expresses control rows as ~100%", {
+  df <- data.frame(
+    PID = rep("P1", 6),
+    Treatment = c("Control", "Control", "Control", "DrugA", "DrugA", "DrugA"),
+    value_ratio_of_total_cells = c(10, 10, 10, 5, 20, 40)
+  )
+
+  normalized <- normalize_to_control(df, value_columns = "value_ratio_of_total_cells")
+
+  expect_true("value_ratio_of_total_cells_pct_of_control" %in% colnames(normalized))
+  expect_equal(
+    normalized$value_ratio_of_total_cells_pct_of_control[df$Treatment == "Control"],
+    rep(100, 3)
+  )
+  expect_equal(
+    normalized$value_ratio_of_total_cells_pct_of_control[df$Treatment == "DrugA"],
+    c(50, 200, 400)
+  )
+})
+
+test_that("normalize_to_control normalizes within each group_by_columns group", {
+  df <- data.frame(
+    PID = c("P1", "P1", "P2", "P2"),
+    Treatment = c("Control", "DrugA", "Control", "DrugA"),
+    value_ratio_of_total_cells = c(10, 20, 5, 5)
+  )
+
+  normalized <- normalize_to_control(df, value_columns = "value_ratio_of_total_cells")
+
+  expect_equal(
+    normalized$value_ratio_of_total_cells_pct_of_control,
+    c(100, 200, 100, 100)
+  )
+})
+
+test_that("normalize_to_control errors when no control rows are present", {
+  df <- data.frame(
+    PID = "P1",
+    Treatment = "DrugA",
+    value_ratio_of_total_cells = 5
+  )
+
+  expect_error(
+    normalize_to_control(df, value_columns = "value_ratio_of_total_cells"),
+    "No rows found"
+  )
+})
+
+test_that("normalize_to_control auto-detects marker_positivity_ratio in long format", {
+  df <- data.frame(
+    PID = rep("P1", 4),
+    Treatment = c("Control", "Control", "DrugA", "DrugA"),
+    marker_positivity = "cCASP3",
+    marker_positivity_ratio = c(10, 10, 20, 30)
+  )
+
+  normalized <- normalize_to_control(df)
+
+  expect_true("pct_of_control" %in% colnames(normalized))
+  expect_equal(normalized$pct_of_control, c(100, 100, 200, 300))
+})
+
+test_that("plot_dose_response returns a ggplot object", {
+  df <- data.frame(
+    PID = rep("P1", 4),
+    Treatment = c("Control", "DrugA", "DrugA", "DrugA"),
+    Concentration1 = c(NA, "1", "10", "100"),
+    marker_positivity = "cCASP3",
+    marker_positivity_ratio = c(10, 10, 20, 30)
+  )
+  normalized <- normalize_to_control(df)
+
+  p <- plot_dose_response(normalized)
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_dose_response errors on missing pct_of_control column", {
+  df <- data.frame(
+    PID = "P1", Treatment = "DrugA", Concentration1 = "1",
+    marker_positivity = "cCASP3"
+  )
+  expect_error(plot_dose_response(df), "Missing required columns")
+})
+
+test_that("plot_dose_response_heatmap returns a ggplot object", {
+  df <- data.frame(
+    PID = "PID1",
+    Treatment = c("Control", "Control", rep(c("DrugA", "DrugB"), each = 3)),
+    Concentration1 = c(NA, NA, "1", "10", "100", "1", "10", "100"),
+    marker_positivity = "cCASP3",
+    marker_positivity_ratio = c(10, 10, 8, 6, 4, 12, 14, 16)
+  )
+  normalized <- normalize_to_control(df)
+
+  p <- plot_dose_response_heatmap(normalized)
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_dose_response_heatmap errors on missing pct_of_control column", {
+  df <- data.frame(
+    PID = "P1", Treatment = "DrugA", Concentration1 = "1",
+    marker_positivity = "cCASP3"
+  )
+  expect_error(plot_dose_response_heatmap(df), "Missing required columns")
+})
+
+test_that("plot_treatment_summary ranks treatments by mean pct_of_control", {
+  df <- data.frame(
+    PID = "PID1",
+    Treatment = c("Control", "Control", "DrugA", "DrugA", "DrugB", "DrugB"),
+    marker_positivity = "cCASP3",
+    marker_positivity_ratio = c(10, 10, 4, 6, 14, 16)
+  )
+  normalized <- normalize_to_control(df)
+
+  p <- plot_treatment_summary(normalized)
+  expect_s3_class(p, "ggplot")
+
+  built <- ggplot2::ggplot_build(p)
+  plot_data_levels <- levels(built$plot$data$Treatment)
+  expect_equal(plot_data_levels, c("DrugA", "DrugB"))
+})
+
+test_that("plot_treatment_summary errors on missing pct_of_control column", {
+  df <- data.frame(PID = "P1", Treatment = "DrugA", marker_positivity = "cCASP3")
+  expect_error(plot_treatment_summary(df), "Missing required columns")
+})
+
+test_that("plot_patient_heatmap returns a ggplot object", {
+  df <- data.frame(
+    PID = rep(c("PID1", "PID2"), each = 4),
+    Treatment = rep(c("Control", "DrugA"), 4),
+    marker_positivity = "cCASP3",
+    marker_positivity_ratio = c(10, 5, 10, 8, 12, 4, 12, 6)
+  )
+  normalized <- normalize_to_control(df)
+
+  p <- plot_patient_heatmap(normalized)
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("plot_patient_heatmap errors on missing pct_of_control column", {
+  df <- data.frame(PID = "P1", Treatment = "DrugA", marker_positivity = "cCASP3")
+  expect_error(plot_patient_heatmap(df), "Missing required columns")
+})
+
+test_that("plot_normalization_before_after returns a ggplot object with before/after facets", {
+  df <- data.frame(
+    PID = "PID1",
+    Treatment = c("Control", "Control", "DrugA", "DrugA", "DrugB", "DrugB"),
+    marker_positivity = "cCASP3",
+    marker_positivity_ratio = c(10, 12, 4, 6, 18, 20)
+  )
+  normalized <- normalize_to_control(df)
+
+  p <- plot_normalization_before_after(normalized)
+  expect_s3_class(p, "ggplot")
+
+  built <- ggplot2::ggplot_build(p)
+  expect_equal(
+    levels(built$plot$data$facet_label),
+    c("cCASP3 \u2014 Before (raw ratio)",
+      "cCASP3 \u2014 After (% of control)")
+  )
+})
+
+test_that("plot_normalization_before_after errors on missing pct_of_control column", {
+  df <- data.frame(
+    PID = "P1", Treatment = "DrugA",
+    marker_positivity = "cCASP3", marker_positivity_ratio = 5
+  )
+  expect_error(plot_normalization_before_after(df), "Missing required columns")
+})
+
 test_that("String parsing works correctly for DMSO control", {
   input_data <- data.frame(
     Image = "B516_Ascites_2023-11-25_DOC2020-12-14_dmso_rep_Ecad_cCasp3_(series 01).tif"

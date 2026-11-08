@@ -1,0 +1,228 @@
+{
+  "access": {
+    "embargo": {
+      "active": false,
+      "reason": null
+    },
+    "files": "public",
+    "record": "public",
+    "status": "open"
+  },
+  "created": "2025-01-27T11:31:43.479379+00:00",
+  "custom_fields": {
+    "code:codeRepository": "https://github.com/flalom/drugsens"
+  },
+  "deletion_status": {
+    "is_deleted": false,
+    "status": "P"
+  },
+  "files": {
+    "count": 1,
+    "enabled": true,
+    "entries": {
+      "flalom/drugsens-v0.1.0.zip": {
+        "access": {
+          "hidden": false
+        },
+        "checksum": "md5:6f2595a6511a5f94fde2a0ca4fa9e274",
+        "ext": "zip",
+        "id": "3e2ff063-0aa8-4dcd-8132-21a8a3c98a53",
+        "key": "flalom/drugsens-v0.1.0.zip",
+        "links": {
+          "content": "https://zenodo.org/api/records/14747763/files/flalom/drugsens-v0.1.0.zip/content",
+          "self": "https://zenodo.org/api/records/14747763/files/flalom/drugsens-v0.1.0.zip"
+        },
+        "metadata": null,
+        "mimetype": "application/zip",
+        "size": 1777719,
+        "storage_class": "L"
+      }
+    },
+    "order": [],
+    "total_bytes": 1777719
+  },
+  "id": "14747763",
+  "is_draft": false,
+  "is_published": true,
+  "links": {
+    "access": "https://zenodo.org/api/records/14747763/access",
+    "access_grants": "https://zenodo.org/api/records/14747763/access/grants",
+    "access_links": "https://zenodo.org/api/records/14747763/access/links",
+    "access_request": "https://zenodo.org/api/records/14747763/access/request",
+    "access_users": "https://zenodo.org/api/records/14747763/access/users",
+    "archive": "https://zenodo.org/api/records/14747763/files-archive",
+    "archive_media": "https://zenodo.org/api/records/14747763/media-files-archive",
+    "communities": "https://zenodo.org/api/records/14747763/communities",
+    "communities-suggestions": "https://zenodo.org/api/records/14747763/communities-suggestions",
+    "doi": "https://doi.org/10.5281/zenodo.14747763",
+    "draft": "https://zenodo.org/api/records/14747763/draft",
+    "files": "https://zenodo.org/api/records/14747763/files",
+    "latest": "https://zenodo.org/api/records/14747763/versions/latest",
+    "latest_html": "https://zenodo.org/records/14747763/latest",
+    "media_files": "https://zenodo.org/api/records/14747763/media-files",
+    "parent": "https://zenodo.org/api/records/14747762",
+    "parent_doi": "https://doi.org/10.5281/zenodo.14747762",
+    "parent_doi_html": "https://zenodo.org/doi/10.5281/zenodo.14747762",
+    "parent_html": "https://zenodo.org/records/14747762",
+    "requests": "https://zenodo.org/api/records/14747763/requests",
+    "reserve_doi": "https://zenodo.org/api/records/14747763/draft/pids/doi",
+    "self": "https://zenodo.org/api/records/14747763",
+    "self_doi": "https://doi.org/10.5281/zenodo.14747763",
+    "self_doi_html": "https://zenodo.org/doi/10.5281/zenodo.14747763",
+    "self_html": "https://zenodo.org/records/14747763",
+    "self_iiif_manifest": "https://zenodo.org/api/iiif/record:14747763/manifest",
+    "self_iiif_sequence": "https://zenodo.org/api/iiif/record:14747763/sequence/default",
+    "versions": "https://zenodo.org/api/records/14747763/versions"
+  },
+  "media_files": {
+    "count": 0,
+    "enabled": false,
+    "entries": {},
+    "order": [],
+    "total_bytes": 0
+  },
+  "metadata": {
+    "creators": [
+      {
+        "affiliations": [
+          {
+            "name": "Universit\u00e4tsspital Basel"
+          }
+        ],
+        "person_or_org": {
+          "family_name": "Flavio Lombardo",
+          "name": "Flavio Lombardo",
+          "type": "personal"
+        }
+      }
+    ],
+    "description": "<p>[0.1.0] - 2025-01-01\nAdded</p>\n<ul>\n<li>Launch of the first version of drugsens, providing functionalities for drug sensitivity analysis in translational research.</li>\n<li>Support for .csv files.</li>\n<li>Comprehensive metadata extraction from microscopy images, including patient ID, tissue type, and treatment details.</li>\n<li>Automated workflow for image analysis</li>\n<li>Package in CRAN</li>\n<li>Zenodo</li>\n</ul>\n<p>Changed</p>\n<ul>\n<li>Updated documentation to include detailed descriptions of metadata fields.</li>\n</ul>\n<p>Fixed</p>\n<ul>\n<li>Resolved issues with metadata extraction accuracy.</li>\n</ul>",
+    "publication_date": "2025-01-27",
+    "publisher": "Zenodo",
+    "related_identifiers": [
+      {
+        "identifier": "https://github.com/flalom/drugsens/tree/v0.1.0",
+        "relation_type": {
+          "id": "issupplementto",
+          "title": {
+            "de": "Erg\u00e4nzt",
+            "en": "Is supplement to"
+          }
+        },
+        "resource_type": {
+          "id": "software",
+          "title": {
+            "de": "Software",
+            "en": "Software"
+          }
+        },
+        "scheme": "url"
+      },
+      {
+        "identifier": "10.1016/j.xpro.2024.103274",
+        "relation_type": {
+          "id": "ispublishedin",
+          "title": {
+            "de": "Ist ver\u00f6ffentlicht in",
+            "en": "Is published in"
+          }
+        },
+        "resource_type": {
+          "id": "publication",
+          "title": {
+            "de": "Publikation",
+            "en": "Publication"
+          }
+        },
+        "scheme": "doi"
+      }
+    ],
+    "resource_type": {
+      "id": "software",
+      "title": {
+        "de": "Software",
+        "en": "Software"
+      }
+    },
+    "rights": [
+      {
+        "description": {
+          "en": "The Creative Commons Attribution license allows re-distribution and re-use of a licensed work on the condition that the creator is appropriately credited."
+        },
+        "icon": "cc-by-icon",
+        "id": "cc-by-4.0",
+        "props": {
+          "scheme": "spdx",
+          "url": "https://creativecommons.org/licenses/by/4.0/legalcode"
+        },
+        "title": {
+          "en": "Creative Commons Attribution 4.0 International"
+        }
+      }
+    ],
+    "title": "flalom/drugsens: CRAN",
+    "version": "v0.1.0"
+  },
+  "parent": {
+    "access": {
+      "grants": [],
+      "links": [],
+      "owned_by": {
+        "user": "316681"
+      },
+      "settings": {
+        "accept_conditions_text": null,
+        "allow_guest_requests": false,
+        "allow_user_requests": false,
+        "secret_link_expiration": 0
+      }
+    },
+    "communities": {},
+    "id": "14747762",
+    "pids": {
+      "doi": {
+        "client": "datacite",
+        "identifier": "10.5281/zenodo.14747762",
+        "provider": "datacite"
+      }
+    }
+  },
+  "pids": {
+    "doi": {
+      "client": "datacite",
+      "identifier": "10.5281/zenodo.14747763",
+      "provider": "datacite"
+    },
+    "oai": {
+      "identifier": "oai:zenodo.org:14747763",
+      "provider": "oai"
+    }
+  },
+  "revision_id": 6,
+  "stats": {
+    "all_versions": {
+      "data_volume": 7110876.0,
+      "downloads": 4,
+      "unique_downloads": 4,
+      "unique_views": 13,
+      "views": 17
+    },
+    "this_version": {
+      "data_volume": 7110876.0,
+      "downloads": 4,
+      "unique_downloads": 4,
+      "unique_views": 13,
+      "views": 17
+    }
+  },
+  "status": "published",
+  "swh": {
+    "swhid": "swh:1:dir:80fb28b2408c6af15b28069a6e1403613a251fd0;origin=https://doi.org/10.5281/zenodo.14747762;visit=swh:1:snp:f9b2232c430803d204fb6f430c3a40584217cd4d;anchor=swh:1:rel:fb75e21e50da398175bf386932bb74548182fb4d;path=flalom-drugsens-4d6e7b6"
+  },
+  "updated": "2025-02-13T14:09:15.351148+00:00",
+  "versions": {
+    "index": 1,
+    "is_latest": true,
+    "is_latest_draft": true
+  }
+}

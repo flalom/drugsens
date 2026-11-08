@@ -235,7 +235,7 @@ get_QC_plots_parsed_merged_data(bind_data,
                                 fill_color_variable = "Treatment_complete", 
                                 save_plots = TRUE)
 ```
-<img src="assets/QC_plot3.png" alt="QC Plot example" title="QC Plot example" width="500" height="500"/>
+<img src="man/figures/QC_plot3.png" alt="QC Plot example" title="QC Plot example" width="500" height="500"/>
 <br>
 
 ### Making plotting-ready data
@@ -248,7 +248,7 @@ Visualizing the results of the previous steps is essential to asses your experim
 ``` r
 get_QC_plots(plotting_ready_dataframe, save_plots = TRUE, isolate_a_specific_patient = "B39")
 ```
-<img src="assets/QC_plot.png" alt="QC Plot example" title="QC Plot example" width="500" height="500"/>
+<img src="man/figures/QC_plot.png" alt="QC Plot example" title="QC Plot example" width="500" height="500"/>
 <br>
 
 ## Run with user's data
@@ -304,7 +304,7 @@ Each file is read, and additional metadata is extracted. This will return a data
 plots <- get_QC_plots_parsed_merged_data(bind_data, 
 fill_color_variable = "Treatment_complete", save_plots = TRUE)
 ``` 
-<img src="assets/QC_plot1.png" alt="QC Plot example" title="QC Plot example" width="500" height="500"/>
+<img src="man/figures/QC_plot1.png" alt="QC Plot example" title="QC Plot example" width="500" height="500"/>
 <br>
 This plots shows the ratio of expressed markers in the various conditions, other variables (for `example Tissues` or `Treatment_complete`) can also be used. The data will be, by default, be saved in the current working directory in a folder called `figures` and will make subfolders for each PID present in the dataset.
 
@@ -362,11 +362,33 @@ More parameters can be specified to personalize the plot(s).
 
 - `.data`: The preprocessed and merged dataframe, expected to be in a long format, typically obtained after processing through make_count_dataframe() and change_data_format_to_longer().
 - `patient_column_name`: Specifies the column in .data that contains patient identifiers (defaults to "PID").
-- `colors`: A vector of colors for the plots. Defaults to c("darkgreen", "red", "orange", "pink").
+- `colors`: A vector of colors for the plots. Defaults to a colorblind-safe 4-hue set (blue, orange, aqua, yellow).
 - `save_plots`: A Boolean flag indicating whether to save the generated plots. If TRUE, plots are saved in the specified directory.
 - `folder_name`: The name of the folder where plots will be saved if save_plots is TRUE. Defaults to "figures".
 - `isolate_a_specific_patient`: If specified, QC plots will be generated for this patient only. Defaults to NULL, meaning plots will be generated for all patients.
 - `x_plot_var`: The variable to be used on the x-axis, typically indicating different treatments. Defaults to "Treatment_complete".
+
+### Normalize to control and compare before/after
+
+Once you have plotting-ready data, `normalize_to_control()` expresses every marker value as a percentage of the mean control (vehicle/untreated) value, per patient. This is the standard first step before building dose response curves.
+
+``` r
+normalized <- normalize_to_control(plotting_format)
+```
+
+- `control_treatment_name`: The value in `treatment_column_name` that identifies control/vehicle wells. Defaults to "Control".
+- `group_by_columns`: Columns that define a comparable batch; the control mean is computed within each combination of these columns. Defaults to "PID".
+
+`plot_normalization_before_after()` then shows the raw ratio next to the normalized percent-of-control value, one pair of panels per marker, so you can see at a glance what normalization did to the data:
+
+``` r
+plot_normalization_before_after(normalized)
+```
+
+<img src="man/figures/normalization_before_after.png" alt="Normalization before/after example" title="Normalization before/after example" width="500" height="500"/>
+<br>
+
+From there, `plot_dose_response()`, `plot_dose_response_heatmap()`, `plot_treatment_summary()`, and `plot_patient_heatmap()` all build on the normalized data to give dose-response curves, treatment x concentration and patient x treatment overviews, and a ranked summary of the whole drug panel. See the [function reference](https://flalom.github.io/drugsens/reference/) for details on each.
 
 ## Contributing
 

@@ -6,7 +6,8 @@
 #' @param .data The preprocessed data (after running make_count_dataframe() and change_data_format_to_longer())
 #'              merged data.frame that should be visualized
 #' @param patient_column_name The PID's column name in the merged data.frame (defaults to "PID")
-#' @param colors A list of colors to supply to personalize the plot, defaults to c("darkgreen", "red", "orange", "pink")
+#' @param colors A list of colors to supply to personalize the plot, defaults to a
+#'   colorblind-safe 4-hue set (blue, orange, aqua, yellow)
 #' @param save_plots A Boolean value indicating if the plots should be saved or not (default is FALSE)
 #' @param folder_name A string indicating the name of the folder where to save the plots if save_plots is TRUE
 #' @param isolate_a_specific_patient A string indicating the patient name to isolate for single plot case (default is NULL)
@@ -42,7 +43,7 @@
 #' @export
 get_QC_plots <- function(.data,
                          patient_column_name = "PID",
-                         colors = c("darkgreen", "red", "orange", "pink"),
+                         colors = unname(drugsens_palette[c("blue", "orange", "aqua", "yellow")]),
                          save_plots = FALSE,
                          folder_name = NULL,
                          x_plot_var = "Treatment_complete",
@@ -89,10 +90,10 @@ get_QC_plots <- function(.data,
                                ggplot2::aes(x = .data[[x_plot_var]],
                                             y = marker_positivity_ratio,
                                             color = marker_positivity)) +
-      ggplot2::geom_boxplot(position = ggplot2::position_dodge(width = 1.0)) +
-      ggplot2::facet_wrap(~marker_positivity) +
-      ggplot2::geom_jitter(width = 0.15) +
-      ggplot2::theme_light() +
+      ggplot2::geom_boxplot(position = ggplot2::position_dodge(width = 1.0), outlier.shape = NA) +
+      ggplot2::facet_wrap(~marker_positivity, labeller = drugsens_wrap_labeller(18)) +
+      ggplot2::geom_jitter(width = 0.15, alpha = 0.5, size = 1.2) +
+      drugsens_theme() +
       ggplot2::labs(
         title = paste0("Cell marker ratios for PID: ", current_pid),
         color = "Cell marker",
@@ -100,17 +101,13 @@ get_QC_plots <- function(.data,
         x = "Drugs"
       ) +
       ggplot2::theme(
-        axis.text.x = ggplot2::element_text(angle = 45, hjust = 1.0),
+        axis.text.x = ggplot2::element_text(hjust = 0.5, size = ggplot2::rel(0.72)),
         axis.title.x = ggplot2::element_blank(),
-        plot.title = ggplot2::element_text(hjust = 0.5),
         axis.ticks.x = ggplot2::element_blank(),
-        panel.grid = ggplot2::element_blank(),
-        strip.background = ggplot2::element_rect(
-          colour = "black",
-          fill = "grey1"
-        )
+        panel.grid.major.x = ggplot2::element_blank()
       ) +
-      ggplot2::scale_color_manual(values = colors) +
+      ggplot2::scale_color_manual(values = colors, labels = function(x) drugsens_wrap_text(x, 20)) +
+      ggplot2::scale_x_discrete(labels = function(x) drugsens_wrap_text(x, 9)) +
       ggplot2::stat_summary(
         fun = "median",
         geom = "point",
