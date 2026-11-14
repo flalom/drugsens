@@ -22,7 +22,8 @@ get_QC_plots_parsed_merged_data(
 )
 }
 \arguments{
-\item{.data}{The preprocessed data frame to analyze}
+\item{.data}{The preprocessed data frame to analyze (either raw bound data from \code{data_binding()}
+or long-format count data from \code{change_data_format_to_longer()}).}
 
 \item{list_of_columns_to_plot}{Columns to include in plots. If NULL, all numeric columns are used.}
 

@@ -305,3 +305,145 @@ test_that("String parsing works correctly for DMSO control", {
   expect_true(is.na(result$ConcentrationUnits1))
   expect_equal(result$Treatment_complete, "dmso")
 })
+
+test_that("drugsens_theme and drugsens_palette are exported and valid", {
+  expect_type(drugsens_palette, "character")
+  expect_length(drugsens_palette, 8)
+  th <- drugsens_theme()
+  expect_s3_class(th, "theme")
+})
+
+test_that("plot_dose_response fits 4PL Hill curves and populates ic50 attribute", {
+  df <- data.frame(
+    PID = rep("P1", 10),
+    Treatment = c("Control", "Control", rep("DrugA", 8)),
+    Concentration1 = c(NA, NA, "0.1", "0.1", "1", "1", "10", "10", "100", "100"),
+    marker_positivity = "cCASP3",
+    marker_positivity_ratio = c(10, 10, 11, 12, 18, 20, 32, 35, 42, 44)
+  )
+  normalized <- normalize_to_control(df)
+
+  p <- plot_dose_response(normalized, method = "4pl", show_ic50 = TRUE)
+  expect_s3_class(p, "ggplot")
+  ic50_tbl <- attr(p, "ic50")
+  expect_s3_class(ic50_tbl, "data.frame")
+  expect_equal(nrow(ic50_tbl), 1)
+  expect_true(is.finite(ic50_tbl$ic50) && ic50_tbl$ic50 > 0)
+})
+
+test_that("plot_treatment_summary and get_QC_plots support compare_to_control", {
+  df <- data.frame(
+    PID = rep("P1", 9),
+    Treatment = rep(c("Control", "DrugA", "DrugB"), each = 3),
+    Treatment_complete = rep(c("Control", "DrugA10uM", "DrugB10uM"), each = 3),
+    marker_positivity = "cCASP3",
+    marker_positivity_ratio = c(0.10, 0.11, 0.09, 0.45, 0.48, 0.42, 0.12, 0.11, 0.10)
+  )
+  normalized <- normalize_to_control(df)
+
+  p_sum <- plot_treatment_summary(
+    normalized,
+    compare_to_control = TRUE,
+    stat_method = "t.test",
+    p_adjust_method = "BH",
+    pvalue_label = "p.adj.format"
+  )
+  expect_s3_class(p_sum, "ggplot")
+  expect_true("p_adj" %in% colnames(attr(p_sum, "stats")))
+  expect_equal(attr(p_sum, "stats")$p_adjust_method[1], "BH")
+
+  p_qc <- get_QC_plots(
+    df,
+    isolate_a_specific_patient = "P1",
+    compare_to_control = TRUE,
+    stat_method = "t.test",
+    p_adjust_method = "bonferroni"
+  )
+  expect_s3_class(p_qc, "ggplot")
+  expect_true("p_adj" %in% colnames(attr(p_qc, "stats")))
+
+  p_hm <- plot_patient_heatmap(
+    normalized,
+    show_values = TRUE,
+    compare_to_control = TRUE,
+    stat_method = "t.test",
+    p_adjust_method = "BH"
+  )
+  expect_s3_class(p_hm, "ggplot")
+  expect_true("p_adj" %in% colnames(attr(p_hm, "stats")))
+})
+
+test_that("normalize_to_control and plot_dose_response compute viability from dead_markers and viable_markers", {
+  base_df <- data.frame(
+    PID = rep("P1", 5),
+    Treatment = c("Control", rep("Paclitaxel", 4)),
+    Concentration1 = c(NA, "0.1", "1", "10", "100"),
+    Rep = 1:5
+  )
+  casp <- base_df
+  casp$marker_positivity <- "cCASP3_ratio_of_total_cells"
+  casp$marker_positivity_ratio <- c(0.07, 0.10, 0.25, 0.45, 0.60)
+
+  epcam <- base_df
+  epcam$marker_positivity <- "EpCAM_E-Cadherin_ratio_of_total_cells"
+  epcam$marker_positivity_ratio <- c(0.63, 0.60, 0.45, 0.25, 0.10)
+
+  dapi <- base_df
+  dapi$marker_positivity <- "onlyDAPIPositve_ratio_of_total_cells"
+  dapi$marker_positivity_ratio <- rep(0.30, 5)
+
+  screen_df <- rbind(casp, epcam, dapi)
+  norm_v <- normalize_to_control(
+    screen_df,
+    dead_markers = "cCASP3",
+    viable_markers = "EpCAM_E-Cadherin",
+    control_treatment_name = "Control"
+  )
+
+  expect_equal(nrow(norm_v), 5)
+  expect_equal(norm_v$total_target_cells_ratio, rep(0.70, 5))
+  expect_equal(norm_v$viable_fraction[1], 0.90)
+  expect_equal(norm_v$pct_of_control[1], 100)
+  expect_true(all(diff(norm_v$pct_of_control) < 0))
+
+  p_dr <- plot_dose_response(
+    screen_df,
+    dead_markers = "cCASP3",
+    viable_markers = "EpCAM_E-Cadherin",
+    selected_treatments = "Paclitaxel",
+    method = "4pl",
+    show_ic50 = TRUE
+  )
+  expect_s3_class(p_dr, "ggplot")
+  expect_equal(nrow(attr(p_dr, "ic50")), 1)
+  expect_equal(nrow(attr(p_dr, "consensus_ic50")), 1)
+
+  # Multi-marker: 2 viable markers + 2 dead markers -> 2 individual panels + 1 consensus panel
+  epcam2 <- epcam
+  epcam2$marker_positivity <- "EpCAM_ratio_of_total_cells"
+  ecad2 <- epcam
+  ecad2$marker_positivity <- "E-Cadherin_ratio_of_total_cells"
+  casp2 <- casp
+  casp2$marker_positivity <- "cCASP3_ratio_of_total_cells"
+  parp2 <- casp
+  parp2$marker_positivity <- "cPARP_ratio_of_total_cells"
+
+  multi_df <- rbind(epcam2, ecad2, casp2, parp2, dapi)
+  p_multi <- plot_dose_response(
+    multi_df,
+    viable_markers = c("EpCAM", "E-Cadherin"),
+    dead_markers = c("cCASP3", "cPARP"),
+    selected_treatments = "Paclitaxel",
+    method = "4pl",
+    show_ic50 = TRUE,
+    consensus_dispersion = "rcvq"
+  )
+  expect_s3_class(p_multi, "ggplot")
+  expect_equal(nrow(attr(p_multi, "ic50")), 3)
+  expect_equal(nrow(attr(p_multi, "consensus_ic50")), 1)
+  expect_equal(as.character(attr(p_multi, "consensus_ic50")$marker_positivity), "Consensus Viability (Combined)")
+  expect_true(all(c("cv", "rcvq", "rcv_mad", "sd", "se") %in% colnames(attr(p_multi, "consensus_cv"))))
+})
+
+
+

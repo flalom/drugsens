@@ -2,6 +2,8 @@
 
 export(change_data_format_to_longer)
 export(data_binding)
+export(drugsens_palette)
+export(drugsens_theme)
 export(generate_qupath_script)
 export(get_QC_plots)
 export(get_QC_plots_parsed_merged_data)
@@ -19,23 +21,58 @@ import(ggpubr)
 import(knitr)
 import(roxygen2)
 import(testthat)
-importFrom(dplyr,filter)
-importFrom(dplyr,select)
-importFrom(ggplot2,aes)
-importFrom(ggplot2,aes_string)
-importFrom(ggplot2,element_text)
-importFrom(ggplot2,facet_wrap)
-importFrom(ggplot2,geom_boxplot)
-importFrom(ggplot2,geom_jitter)
-importFrom(ggplot2,geom_violin)
-importFrom(ggplot2,ggplot)
-importFrom(ggplot2,labs)
-importFrom(ggplot2,position_jitter)
-importFrom(ggplot2,stat_summary)
-importFrom(ggplot2,theme)
-importFrom(stats,setNames)
-importFrom(stringr,str_count)
-importFrom(stringr,str_extract)
+importFrom(dplyr,
+  filter,
+  select
+)
+importFrom(ggplot2,
+  aes,
+  coord_flip,
+  element_blank,
+  element_text,
+  expansion,
+  facet_wrap,
+  geom_boxplot,
+  geom_col,
+  geom_errorbar,
+  geom_hline,
+  geom_jitter,
+  geom_line,
+  geom_point,
+  geom_smooth,
+  geom_text,
+  geom_tile,
+  geom_violin,
+  geom_vline,
+  ggplot,
+  labs,
+  position_dodge,
+  position_jitter,
+  position_jitterdodge,
+  scale_fill_gradientn,
+  scale_x_log10,
+  scale_y_continuous,
+  stat_summary,
+  theme
+)
+importFrom(stats,
+  IQR,
+  aggregate,
+  approx,
+  cor,
+  mad,
+  median,
+  optim,
+  p.adjust,
+  p.adjust.methods,
+  reorder,
+  sd,
+  setNames
+)
+importFrom(stringr,
+  str_count,
+  str_extract
+)
 importFrom(tidyr,pivot_longer)
 importFrom(tidyselect,any_of)
 importFrom(utils,read.csv)

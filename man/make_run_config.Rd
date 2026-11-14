@@ -12,7 +12,7 @@ make_run_config(overwrite_config = FALSE, forcePath = NULL)
 \item{forcePath}{String, Define a custom path for the config file}
 }
 \value{
-A \code{dataframe}/\code{tibble}.
+Invisibly returns the path to the configuration file.
 }
 \description{
 When this function run the first time, it will generated a config.txt file in the user working directory.

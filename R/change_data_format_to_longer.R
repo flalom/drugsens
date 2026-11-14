@@ -73,7 +73,7 @@ change_data_format_to_longer <- function(.data,
       additional_columns_to_use
     ))) |>
     pivot_longer(
-      cols = c(col_names_of_markers),
+      cols = any_of(col_names_of_markers),
       names_to = "marker_positivity",
       values_to = "marker_positivity_ratio"
     )

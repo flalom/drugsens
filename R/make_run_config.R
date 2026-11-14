@@ -6,7 +6,7 @@
 #' @param overwrite_config Boolean, if TRUE the `config_drugsens.txt` will be overwritten (default is FALSE)
 #' @param forcePath String, Define a custom path for the config file
 #' @export
-#' @return A `dataframe`/`tibble`.
+#' @return Invisibly returns the path to the configuration file.
 #' @examples
 #' \donttest{
 #' # Generate config in temporary directory
@@ -17,33 +17,7 @@ make_run_config <- function(overwrite_config = FALSE, forcePath = NULL) {
   currentPath <- if (is.null(forcePath)) tempdir() else forcePath
   config_file <- file.path(currentPath, "config_drugsens.txt")
 
-  if (file.exists(config_file)) {
-    tryCatch(
-      expr = {
-        source(config_file, local = FALSE)
-      },
-      error = function(error) {
-        message("drugsens could not load the 'config.txt' file.
-                Please, generate a valid config file with the substitution
-                names form the dataframe and the name of the columns to use
-                for your project. Once the 'config.txt' is available re-run
-                run_config to veryfy that the data was correctly read")
-      }
-    )
-  } else if (overwrite_config) {
-    write(
-      x = '# List of markers to relabel
-        list_of_relabeling =
-        list(
-            "PathCellObject" = "onlyDAPIPositve",
-            "cCasp3" = "cCASP3",
-            "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
-            "EpCAM_E-Cadherin" = "E-Cadherin",
-            "EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3"
-          )',
-      file = config_file
-    )
-  } else {
+  if (!file.exists(config_file) || overwrite_config) {
     write(
       x = '# List of markers to relabel
         list_of_relabeling =
@@ -57,4 +31,19 @@ make_run_config <- function(overwrite_config = FALSE, forcePath = NULL) {
       file = config_file
     )
   }
+
+  tryCatch(
+    expr = {
+      source(config_file, local = FALSE)
+    },
+    error = function(error) {
+      message("drugsens could not load the 'config_drugsens.txt' file.
+              Please generate a valid config file with the substitution
+              names from the dataframe and the name of the columns to use
+              for your project. Once the config file is available, re-run
+              make_run_config() to verify that the data was correctly read.")
+    }
+  )
+
+  invisible(config_file)
 }

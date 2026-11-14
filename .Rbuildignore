@@ -11,3 +11,6 @@
 ^docs$
 ^_pkgdown\.yml$
 ^pkgdown$
+^\.zenodo\.json$
+^zenodo$
+^dev_scripts$

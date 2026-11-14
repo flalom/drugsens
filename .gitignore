@@ -9,5 +9,5 @@
 figures/**
 temp/**
 .DS_Store
-*.txt
 docs/
+dev_scripts/

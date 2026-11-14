@@ -2,3 +2,70 @@ url: https://flalom.github.io/drugsens/
 
 template:
   bootstrap: 5
+  bslib:
+    primary: "#2a78d6"
+    border-radius: 0.4rem
+    btn-border-radius: 0.3rem
+
+figures:
+  fig.width: 10
+  fig.height: 7
+  dpi: 150
+
+home:
+  title: "drugsens — Automated Drug Sensitivity Analysis from QuPath Data"
+  description: >
+    Automated metadata parsing, marker quantification, quality control, control
+    normalization, and dose-response visualization for QuPath fluorescence
+    microscopy screens in 3D patient-derived cancer models.
+
+navbar:
+  structure:
+    left:  [intro, articles, reference, news]
+    right: [search, github]
+  components:
+    intro:
+      text: Get Started
+      href: articles/drugsens.html
+    articles:
+      text: Tutorials
+      menu:
+      - text: "1. QuPath Setup & Filename Metadata Conventions"
+        href: articles/qupath-and-metadata.html
+      - text: "2. End-to-End Quality Control & Feature Inspection"
+        href: articles/quality-control-workflow.html
+      - text: "3. Cohort Normalization, Dose-Response & Statistics"
+        href: articles/cohort-and-dose-response.html
+
+reference:
+  - title: "QuPath Setup & Data Import"
+    desc: "Generate QuPath export scripts, configure marker relabeling, and bind CSV exports with automatic filename metadata parsing."
+    contents:
+      - generate_qupath_script
+      - make_run_config
+      - data_binding
+      - string_parsing
+  - title: "Cell Counting & Reshaping"
+    desc: "Aggregate per-image marker counts, compute marker positivity ratios, and reshape wide count tables to tidy long format."
+    contents:
+      - make_count_dataframe
+      - change_data_format_to_longer
+  - title: "Quality Control (QC) Visualization"
+    desc: "Inspect raw marker ratios and feature distributions per patient, treatment, or tissue."
+    contents:
+      - get_QC_plots
+      - get_QC_plots_parsed_merged_data
+  - title: "Control Normalization & Dose-Response Analysis"
+    desc: "Normalize treated wells to matched vehicle controls, fit LOESS or 4PL Hill dose-response curves, and visualize drug panels across cohorts."
+    contents:
+      - normalize_to_control
+      - plot_normalization_before_after
+      - plot_dose_response
+      - plot_dose_response_heatmap
+      - plot_treatment_summary
+      - plot_patient_heatmap
+  - title: "Theme & Color Palette"
+    desc: "Shared ggplot2 theme and colorblind-safe categorical palette for custom figures."
+    contents:
+      - drugsens_theme
+      - drugsens_palette

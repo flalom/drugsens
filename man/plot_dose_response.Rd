@@ -10,7 +10,17 @@ plot_dose_response(
   treatment_column_name = "Treatment",
   patient_column_name = "PID",
   control_treatment_name = "Control",
-  log_scale_x = TRUE
+  log_scale_x = TRUE,
+  method = c("loess", "4pl", "linear"),
+  show_ic50 = FALSE,
+  dead_markers = NULL,
+  viable_markers = NULL,
+  total_markers = NULL,
+  response_metric = c("viability", "cell_death"),
+  selected_treatments = NULL,
+  consensus_only = FALSE,
+  consensus_dispersion = c("cv", "rcvq", "rcv_mad", "sd", "se", "iqr", "mad", "none"),
+  show_cv = TRUE
 )
 }
 \arguments{
@@ -31,14 +41,59 @@ from the dose response curve. Defaults to "Control".}
 \item{log_scale_x}{Logical, whether to plot concentration on a log10 axis (the
 usual view when doses span orders of magnitude). Defaults to TRUE; rows with
 a non-positive concentration are dropped when TRUE.}
+
+\item{method}{Curve fitting method: \code{"loess"} (default), \code{"4pl"} (4-parameter
+log-logistic Hill model estimated via \code{stats::optim()}), or \code{"linear"}.
+When \code{"4pl"} is used, a data frame of estimated \code{ic50}, \code{hill_slope}, \code{bottom},
+and \code{top} parameters is attached as \code{attr(plot, "ic50")}.}
+
+\item{show_ic50}{Logical; when \code{TRUE} and \code{method = "4pl"}, draws a vertical
+dashed reference line at the estimated IC50 concentration for each fitted curve.
+Defaults to \code{FALSE}.}
+
+\item{dead_markers}{Optional character vector of marker name(s) representing
+dead/dying cells (e.g. \code{"cCASP3"}). If provided, \code{normalize_to_control()} is
+called automatically to compute the target cell response before plotting.}
+
+\item{viable_markers}{Optional character vector of marker name(s) representing
+viable target/cancer cells (e.g. \code{"EpCAM_E-Cadherin"}).}
+
+\item{total_markers}{Optional character vector of marker name(s) representing
+all target cells (e.g. \code{c("EpCAM_E-Cadherin", "cCASP3")}).}
+
+\item{response_metric}{Metric to compute when \code{dead_markers} is supplied:
+\code{"viability"} (default) or \code{"cell_death"}.}
+
+\item{selected_treatments}{Optional character vector of drug treatment names to
+plot (e.g. \code{"Paclitaxel"}).}
+
+\item{consensus_only}{Logical; when multiple \code{viable_markers} or \code{dead_markers}
+are supplied, \code{FALSE} (default) plots individual panels for each marker pair
+plus a \code{"Consensus Viability (Combined)"} panel and attaches the consensus
+IC50 table as \code{attr(plot, "consensus_ic50")}. Set to \code{TRUE} to plot only the
+combined consensus panel.}
+
+\item{consensus_dispersion}{Coefficient of variation or dispersion metric to
+compute per point on the Consensus panel (attached as \code{attr(plot, "consensus_cv")}
+and plotted as error bars / point labels): \code{"cv"} (standard coefficient of
+variation \code{100 * SD / Mean}, default), \code{"rcvq"} (robust quartile CV
+\code{100 * 0.75 * IQR / Median}), \code{"rcv_mad"} (robust MAD CV \code{100 * MAD / Median}),
+\code{"sd"} (standard deviation), \code{"se"} (standard error), \code{"iqr"} (interquartile
+range), \code{"mad"} (median absolute deviation), or \code{"none"}.}
+
+\item{show_cv}{Logical; whether to print the per-point CV (or selected
+\code{consensus_dispersion} value) on the Consensus panel. Defaults to \code{TRUE}.}
 }
 \value{
-A \code{ggplot} object.
+A \code{ggplot} object (with \code{attr(plot, "ic50")}, \code{attr(plot, "consensus_ic50")},
+and \code{attr(plot, "consensus_cv")} populated).
 }
 \description{
 Plots percent-of-control marker values against drug concentration, the
 standard dose response view for drug sensitivity assays. Expects data
-that has already been processed with \code{normalize_to_control()}.
+that has already been processed with \code{normalize_to_control()}. Supports
+non-parametric LOESS smoothing (\code{method = "loess"}), 4-parameter log-logistic
+Hill curve fitting (\code{method = "4pl"}), or linear trend lines (\code{method = "linear"}).
 }
 \examples{
 df <- data.frame(
@@ -50,4 +105,5 @@ df <- data.frame(
 )
 normalized <- normalize_to_control(df)
 plot_dose_response(normalized)
+plot_dose_response(normalized, method = "4pl", show_ic50 = TRUE)
 }

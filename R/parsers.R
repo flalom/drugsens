@@ -40,22 +40,27 @@ string_parsing <- function(.data) {
 
   .data$Treatment <- sapply(strsplit(.data$Image, "_"), `[`, 5, simplify = FALSE) |> unlist()
 
+  .data$Concentration1 <- NA_character_
+  .data$Concentration2 <- NA_character_
+  .data$ConcentrationUnits1 <- NA_character_
+  .data$ConcentrationUnits2 <- NA_character_
+
   for (double_patterns in unique(.data$Treatment)) {
+    rows_t <- .data$Treatment == double_patterns
     number_maiusc <- stringr::str_count(pattern = "[A-Z]", string = double_patterns)
     if ((number_maiusc >= 2) &
       (number_maiusc < nchar(double_patterns))) {
-       # save the double drugs
-       multiple_drugs[[double_patterns]] <- double_patterns
-      .data <- .data[.data$Treatment == double_patterns, ]
-      .data$Concentration1 <- sapply(strsplit(.data$Image, "_"), `[`, 6, simplify = FALSE) |> unlist()
-      .data$Concentration2 <- sapply(strsplit(.data$Image, "_"), `[`, 8, simplify = FALSE) |> unlist()
-      .data$ConcentrationUnits1 <- sapply(strsplit(.data$Image, "_"), `[`, 7, simplify = FALSE) |> unlist()
-      .data$ConcentrationUnits2 <- sapply(strsplit(.data$Image, "_"), `[`, 9, simplify = FALSE) |> unlist()
+      # save the double drugs
+      multiple_drugs[[double_patterns]] <- double_patterns
+      .data$Concentration1[rows_t] <- sapply(strsplit(.data$Image[rows_t], "_"), `[`, 6, simplify = FALSE) |> unlist()
+      .data$Concentration2[rows_t] <- sapply(strsplit(.data$Image[rows_t], "_"), `[`, 8, simplify = FALSE) |> unlist()
+      .data$ConcentrationUnits1[rows_t] <- sapply(strsplit(.data$Image[rows_t], "_"), `[`, 7, simplify = FALSE) |> unlist()
+      .data$ConcentrationUnits2[rows_t] <- sapply(strsplit(.data$Image[rows_t], "_"), `[`, 9, simplify = FALSE) |> unlist()
     } else {
-      .data$Concentration1 <- str_extract(.data$Image, "\\d+(?=_[munp][Mm])")
-      .data$Concentration2 <- NA_integer_
-      .data$ConcentrationUnits1 <- str_extract(.data$Image, "[munp][Mm](?=_)")
-      .data$ConcentrationUnits2 <- NA_character_
+      .data$Concentration1[rows_t] <- str_extract(.data$Image[rows_t], "\\d+(?:\\.\\d+)?(?=_[munp][Mm])")
+      .data$Concentration2[rows_t] <- NA_character_
+      .data$ConcentrationUnits1[rows_t] <- str_extract(.data$Image[rows_t], "[munp][Mm](?=_)")
+      .data$ConcentrationUnits2[rows_t] <- NA_character_
     }
   }
 

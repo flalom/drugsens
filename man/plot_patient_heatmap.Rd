@@ -8,7 +8,12 @@ plot_patient_heatmap(
   .data,
   patient_column_name = "PID",
   treatment_column_name = "Treatment",
-  control_treatment_name = "Control"
+  control_treatment_name = "Control",
+  show_values = FALSE,
+  compare_to_control = FALSE,
+  stat_method = c("wilcox", "t.test"),
+  p_adjust_method = "BH",
+  pvalue_label = c("p.signif", "p.format", "p.adj.signif", "p.adj.format")
 )
 }
 \arguments{
@@ -22,9 +27,27 @@ column and a treatment column).}
 
 \item{control_treatment_name}{Value identifying control/vehicle wells, excluded
 from the heatmap. Defaults to "Control".}
+
+\item{show_values}{Logical; whether to print the numeric mean \verb{\% of control}
+inside each heatmap tile. Defaults to \code{FALSE}.}
+
+\item{compare_to_control}{Logical; whether to compute and annotate p-values
+comparing each treatment against \code{control_treatment_name} per patient and
+marker facet. Defaults to \code{FALSE}.}
+
+\item{stat_method}{Statistical test used when \code{compare_to_control = TRUE}:
+\code{"wilcox"} (default) or \code{"t.test"}.}
+
+\item{p_adjust_method}{Multiple-testing correction method passed to
+\code{stats::p.adjust()} across treatments within each patient and marker facet.
+Supports \code{"BH"} (default), \code{"bonferroni"}, \code{"holm"}, \code{"fdr"}, \code{"hochberg"},
+\code{"hommel"}, \code{"BY"}, or \code{"none"}.}
+
+\item{pvalue_label}{Format for p-value annotations: \code{"p.signif"} (\code{*}, \verb{**}, \verb{***}, \code{ns}),
+\code{"p.format"}, \code{"p.adj.signif"}, or \code{"p.adj.format"}. Defaults to \code{"p.signif"}.}
 }
 \value{
-A \code{ggplot} object.
+A \code{ggplot} object (with \code{attr(plot, "stats")} populated when \code{compare_to_control = TRUE}).
 }
 \description{
 Summarizes \code{normalize_to_control()} output into a patient x treatment heatmap

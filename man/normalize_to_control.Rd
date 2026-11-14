@@ -10,7 +10,13 @@ normalize_to_control(
   treatment_column_name = "Treatment",
   group_by_columns = "PID",
   value_columns = NULL,
-  pattern_column_markers = "_ratio_of_total_cells"
+  pattern_column_markers = "_ratio_of_total_cells",
+  dead_markers = NULL,
+  viable_markers = NULL,
+  total_markers = NULL,
+  response_metric = c("viability", "cell_death"),
+  selected_treatments = NULL,
+  consensus_only = FALSE
 )
 }
 \arguments{
@@ -32,16 +38,61 @@ when present (long format), otherwise all columns matching \code{pattern_column_
 
 \item{pattern_column_markers}{Pattern used to auto-detect marker columns in wide
 format. Defaults to "_ratio_of_total_cells".}
+
+\item{dead_markers}{Optional character vector of marker name(s) representing
+dead/dying cells (e.g. \code{"cCASP3"} or \code{c("cCASP3", "E-Cadherin and cCASP3")}).
+Matches names with or without the \code{"_ratio_of_total_cells"} suffix.}
+
+\item{viable_markers}{Optional character vector of marker name(s) representing
+viable target/cancer cells (e.g. \code{"EpCAM_E-Cadherin"} or \code{"E-Cadherin"}).}
+
+\item{total_markers}{Optional character vector of marker name(s) representing
+the total target cell population (e.g. \code{c("EpCAM_E-Cadherin", "cCASP3")}).
+If \code{NULL} when \code{dead_markers} and \code{viable_markers} are provided, defaults to
+\code{unique(c(viable_markers, dead_markers))}.}
+
+\item{response_metric}{Metric to compute and normalize when \code{dead_markers} is
+provided: \code{"viability"} (default, \code{1 - dead / total}, which starts at \verb{100\%}
+in control and decreases toward \verb{0\%} as cells die) or \code{"cell_death"}
+(\code{dead / total}).}
+
+\item{selected_treatments}{Optional character vector of treatment names to keep
+(in addition to \code{control_treatment_name}). Defaults to \code{NULL} (all treatments).}
+
+\item{consensus_only}{Logical; when multiple \code{viable_markers} or \code{dead_markers}
+are supplied and \code{consensus_only = FALSE} (the default), \code{normalize_to_control()}
+computes each individual marker pair's readout as well as a combined
+\code{"Consensus (Combined)"} readout across all selected markers. Set
+\code{consensus_only = TRUE} to return only the combined consensus readout.}
 }
 \value{
 \code{.data} with an added column per normalized value: "\if{html}{\out{<column>}}_pct_of_control"
-in wide format, or a single "pct_of_control" column in long format.
+in wide format, or a single "pct_of_control" column in long format. When
+\code{dead_markers} is supplied, also includes \code{dead_cells_ratio},
+\code{viable_cells_ratio}, \code{total_target_cells_ratio}, \code{dead_fraction},
+\code{viable_fraction}, and \code{is_consensus}.
 }
 \description{
-Expresses each marker measurement as a percentage of the mean control
+Expresses each marker measurement (or a biological target-cell viability /
+cell-death metric computed from user-selected \code{dead_markers} and
+\code{viable_markers} / \code{total_markers}) as a percentage of the mean control
 (untreated/vehicle) value within the same patient. This is the standard
-first step for building dose response curves in drug sensitivity assays,
-following the methodology in Labrosse et al. (2024) \url{doi:10.1016/j.xpro.2024.103274}.
+first step for building dose response curves and estimating \eqn{\mathrm{IC}_{50}}
+in drug sensitivity assays, following Labrosse et al. (2024)
+\url{doi:10.1016/j.xpro.2024.103274}.
+
+When \code{dead_markers} (e.g. \code{"cCASP3"}) and \code{viable_markers} (e.g.
+\code{"EpCAM_E-Cadherin"}) or \code{total_markers} (e.g. \code{c("EpCAM_E-Cadherin", "cCASP3")})
+are supplied, \code{normalize_to_control()} first computes for each well/image:
+\itemize{
+\item \code{dead_cells_ratio}: sum of \code{dead_markers}
+\item \code{total_target_cells_ratio}: sum of \code{total_markers} (living target cells + dying cells, excluding unrelated DAPI-only stromal cells)
+\item \code{viable_cells_ratio}: \code{total_target_cells_ratio - dead_cells_ratio}
+\item \code{dead_fraction}: \code{dead_cells_ratio / total_target_cells_ratio}
+\item \code{viable_fraction}: \code{1 - dead_fraction} (\code{viable_cells_ratio / total_target_cells_ratio})
+}
+and then normalizes the chosen \code{response_metric} (\code{"viability"} or
+\code{"cell_death"}) against the matched \code{control_treatment_name} group.
 }
 \examples{
 # A patient with a control group and one drug at three doses

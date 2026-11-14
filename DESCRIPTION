@@ -1,22 +1,18 @@
 Package: drugsens
 Title: Automated Analysis of 'QuPath' Output Data and Metadata Extraction
 Description: A comprehensive toolkit for analyzing microscopy data output from 'QuPath' software. 
-    Provides functionality for automated data processing, metadata extraction, and statistical 
-    analysis of imaging results. The methodology implemented in this package is based on 
-    Labrosse et al. (2024) <doi:10.1016/j.xpro.2024.103274> "Protocol for quantifying drug 
-    sensitivity in 3D patient-derived ovarian cancer models", which describes the complete 
-    workflow for drug sensitivity analysis in patient-derived cancer models.
-Version: 0.1.0
-BugReports: https://git.scicore.unibas.ch/ovca-research/drugsens/-/issues
-SystemRequirements: QuPath™ 4.0.0 or higher
-Authors@R: c(
-    person("Flavio", "Lombardo", , "flavio.lombardo@unibas.ch", role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0002-4853-6838")),
-    person("Ricardo Coelho", role = c("cph")),   
-    person("Ovarian Cancer Research", role = c("cph")),   
-    person("University of Basel and University Hospital Basel", role = c("cph"))   
-    )
-URL: https://git.scicore.unibas.ch/ovca-research/drugsens/
-Maintainer: Flavio Lombardo <flavio.lombardo@unibas.ch>
+    Provides functionality for automated data processing, metadata extraction, control normalization,
+    dose-response modeling, and statistical visualization of imaging results. The methodology
+    implemented in this package is based on Labrosse et al. (2024) <doi:10.1016/j.xpro.2024.103274>
+    "Protocol for quantifying drug sensitivity in 3D patient-derived ovarian cancer models",
+    which describes the complete workflow for drug sensitivity analysis in patient-derived cancer models.
+Version: 0.2.0
+BugReports: https://github.com/flalom/drugsens/issues
+SystemRequirements: QuPath (>= 0.4.0)
+Authors@R: 
+    person("Flavio", "Lombardo", , "fl@flaviolombardo.site", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4853-6838"))
+URL: https://flalom.github.io/drugsens/, https://github.com/flalom/drugsens
+Maintainer: Flavio Lombardo <fl@flaviolombardo.site>
 License: MIT + file LICENSE
 Imports:
     dplyr,
@@ -33,8 +29,9 @@ Imports:
 Depends: 
     R (>= 4.2)
 Encoding: UTF-8
-LazyData: true
+VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
-Suggests: 
+Suggests:
+    rmarkdown
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.1

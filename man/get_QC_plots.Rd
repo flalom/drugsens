@@ -7,11 +7,16 @@
 get_QC_plots(
   .data,
   patient_column_name = "PID",
-  colors = unname(drugsens_palette[c("blue", "orange", "aqua", "yellow")]),
+  colors = unname(drugsens_palette),
   save_plots = FALSE,
   folder_name = NULL,
   x_plot_var = "Treatment_complete",
-  isolate_a_specific_patient = NULL
+  isolate_a_specific_patient = NULL,
+  compare_to_control = FALSE,
+  control_treatment_name = "Control",
+  stat_method = c("wilcox", "t.test"),
+  p_adjust_method = "BH",
+  pvalue_label = c("p.signif", "p.format", "p.adj.signif", "p.adj.format")
 )
 }
 \arguments{
@@ -20,8 +25,8 @@ merged data.frame that should be visualized}
 
 \item{patient_column_name}{The PID's column name in the merged data.frame (defaults to "PID")}
 
-\item{colors}{A list of colors to supply to personalize the plot, defaults to a
-colorblind-safe 4-hue set (blue, orange, aqua, yellow)}
+\item{colors}{A character vector of colors to supply to personalize the plot, defaults to
+\code{unname(drugsens_palette)} (8-color CVD-safe palette).}
 
 \item{save_plots}{A Boolean value indicating if the plots should be saved or not (default is FALSE)}
 
@@ -30,9 +35,27 @@ colorblind-safe 4-hue set (blue, orange, aqua, yellow)}
 \item{x_plot_var}{A string indicating the treatment's full name for the QC plots (default is "Treatment_complete")}
 
 \item{isolate_a_specific_patient}{A string indicating the patient name to isolate for single plot case (default is NULL)}
+
+\item{compare_to_control}{Logical, whether to compute and display statistical comparisons
+against \code{control_treatment_name} within each marker facet. Defaults to FALSE.}
+
+\item{control_treatment_name}{Value in \code{x_plot_var} identifying the control/vehicle group
+when \code{compare_to_control = TRUE}. Defaults to \code{"Control"}.}
+
+\item{stat_method}{Statistical test used when \code{compare_to_control = TRUE}: \code{"wilcox"} (default)
+or \code{"t.test"}.}
+
+\item{p_adjust_method}{Multiple-testing correction method passed to \code{stats::p.adjust()}
+across treatments within each marker facet. Supports \code{"BH"} (Benjamini-Hochberg FDR, default),
+\code{"bonferroni"}, \code{"holm"}, \code{"fdr"}, \code{"hochberg"}, \code{"hommel"}, \code{"BY"}, or \code{"none"}.}
+
+\item{pvalue_label}{Format for p-value annotations: \code{"p.signif"} (\code{*}, \verb{**}, \verb{***}, \code{ns}),
+\code{"p.format"}, \code{"p.adj.signif"}, or \code{"p.adj.format"}. Defaults to \code{"p.signif"}.}
 }
 \value{
-Invisibly returns NULL, but saves plots to disk if save_plots is TRUE
+When \code{save_plots = FALSE}, returns a \code{ggplot} object (if a single patient is plotted)
+or a named list of \code{ggplot} objects (keyed by patient ID). When \code{save_plots = TRUE},
+invisibly returns the named list of \code{ggplot} objects after saving PDFs to disk.
 }
 \description{
 Plot data to visualize immediate trends. This function expects data that has been processed

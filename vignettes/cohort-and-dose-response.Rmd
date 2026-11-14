@@ -1,0 +1,235 @@
+---
+title: "Cohort Normalization, Dose-Response Curves, and Statistical Comparisons"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Cohort Normalization, Dose-Response Curves, and Statistical Comparisons}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 10,
+  fig.height = 7,
+  dpi = 150,
+  out.width = "100%",
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+## Overview
+
+In 3D patient-derived cancer models stained for nuclear, tumor, and apoptotic markers (**Labrosse et al., 2024**, [doi:10.1016/j.xpro.2024.103274](https://doi.org/10.1016/j.xpro.2024.103274)), each image contains:
+
+- **Viable target/cancer cells** (e.g., `E-Cadherin` positive), which **decrease** as drug concentration increases.
+- **Dying/apoptotic cells** (e.g., `cCASP3` positive and double-positive `E-Cadherin and cCASP3`), which **increase** as drug concentration increases.
+- **Other non-target cells** (e.g., `onlyDAPIPositve` stromal/immune cells), which are excluded from the cancer-specific denominator.
+
+To quantify on-target drug sensitivity and estimate $\text{IC}_{50}$, `drugsens` lets you specify your own **dead/dying cell marker(s)** (`dead_markers`) and **viable/total target cell marker(s)** (`viable_markers` or `total_markers`), along with your **control condition** (`control_treatment_name`):
+
+$$\text{Target Cell Viability} = 1 - \frac{\text{Dead Cells}}{\text{Total Target Cells}} = \frac{\text{Viable Target Cells}}{\text{Viable Target Cells} + \text{Dead Cells}}$$
+
+`normalize_to_control()` then expresses each well's target cell viability as a percentage of the matched patient `Control` mean (`pct_of_control`, where `Control = 100%`), enabling:
+
+1. Side-by-side inspection before and after control normalization (`plot_normalization_before_after()`).
+2. Dose-response curve fitting via LOESS or 4-parameter log-logistic (`4pl`) Hill models with single-marker or multi-marker consensus $\text{IC}_{50}$ estimation (`plot_dose_response()`).
+3. Multi-drug and multi-patient cohort summaries (`plot_dose_response_heatmap()`, `plot_treatment_summary()`, `plot_patient_heatmap()`).
+
+---
+
+## 1. Loading the Package Dataset (`extdata/to_merge`)
+
+We load the single-cell QuPath exports shipped with `drugsens` in `extdata/to_merge/`, compute per-image marker counts and ratios (`make_count_dataframe()`), and pivot to long format (`change_data_format_to_longer()`):
+
+```{r load-cohort}
+library(drugsens)
+library(ggplot2)
+
+example_dir <- system.file("extdata/to_merge/", package = "drugsens")
+bind_data <- data_binding(
+  path_to_the_projects_folder = example_dir,
+  files_extension_to_look_for = "csv"
+)
+
+counts_df <- make_count_dataframe(bind_data)
+long_df <- change_data_format_to_longer(counts_df)
+
+# Inspect patients, treatments, and marker populations in the dataset
+unique(long_df[, c("PID", "Tissue", "Treatment")])
+unique(long_df$marker_positivity)
+```
+
+---
+
+## 2. Selecting Dead and Target Cells & Normalizing to Control (`normalize_to_control()`)
+
+In `normalize_to_control()`, you can specify:
+
+- `dead_markers`: marker(s) representing dying/dead cells (e.g., `"cCASP3"` or `c("cCASP3", "E-Cadherin and cCASP3")`),
+- `viable_markers` (or `total_markers`): marker(s) representing viable cancer cells (here `"E-Cadherin"`, excluding `onlyDAPIPositve`),
+- `control_treatment_name`: your vehicle/untreated control label (here `"Control"`).
+
+Here we compute combined target cell viability across the cohort (`consensus_only = TRUE` produces a single combined viability metric per well when multiple dead markers are supplied):
+
+```{r normalize-step, fig.height = 5.5}
+norm_df <- normalize_to_control(
+  long_df,
+  dead_markers = c("cCASP3", "E-Cadherin and cCASP3"),
+  viable_markers = "E-Cadherin",
+  control_treatment_name = "Control",
+  treatment_column_name = "Treatment",
+  group_by_columns = "PID",
+  consensus_only = TRUE
+)
+
+head(norm_df[, c("PID", "Treatment", "Concentration1", "dead_fraction", "viable_fraction", "pct_of_control")])
+
+plot_normalization_before_after(norm_df)
+```
+
+Notice how inter-patient differences in baseline viability (**Before**, left panel) are aligned to `100%` in the `Control` group (**After**, right panel).
+
+---
+
+## 3. Dose-Response Curves: LOESS, 4PL Hill Models & Consensus $\text{IC}_{50}$ (`plot_dose_response()`)
+
+You can pass `norm_df` (or pass `long_df` directly with `dead_markers`, `viable_markers`, and `selected_treatments`) to `plot_dose_response()`.
+
+### Non-Parametric LOESS Curve (`method = "loess"`)
+
+```{r dr-loess}
+plot_dose_response(
+  norm_df,
+  selected_treatments = "Paclitaxel",
+  method = "loess"
+)
+```
+
+### 4-Parameter Log-Logistic Hill Curve & $\text{IC}_{50}$ (`method = "4pl"`)
+
+Setting `method = "4pl"` fits a 4-parameter log-logistic Hill equation per patient using `stats::optim()`, overlays the fitted sigmoidal curves, marks each patient's estimated $\text{IC}_{50}$ (`show_ic50 = TRUE`), and stores the parameter table in `attr(plot, "ic50")`:
+
+```{r dr-4pl}
+p_4pl <- plot_dose_response(
+  norm_df,
+  selected_treatments = "Paclitaxel",
+  method = "4pl",
+  show_ic50 = TRUE
+)
+p_4pl
+
+# Inspect estimated IC50 and Hill parameters per patient
+attr(p_4pl, "ic50")
+```
+
+### Multi-Marker Selection, Consensus $\text{IC}_{50}$ & Per-Point Coefficient of Variation (`consensus_dispersion`)
+
+In our dataset, QuPath exports two apoptotic/dead cell populations (`"cCASP3"` late apoptosis and double-positive `"E-Cadherin and cCASP3"` early/mid apoptosis) alongside viable cancer cells (`"E-Cadherin"`). When you supply multiple markers to `plot_dose_response()` with `consensus_only = FALSE` (the default), `drugsens` automatically generates:
+
+1. **Individual panels** for each marker pair (`E-Cadherin / (E-Cadherin + cCASP3)` and `E-Cadherin / (E-Cadherin + E-Cadherin and cCASP3)`),
+2. A **`Consensus Viability (Combined)`** panel that combines the markers, marks the **bold 50% response point ($\text{IC}_{50}$)** on every curve, and overlays per-point dispersion (`consensus_dispersion = "cv"` for standard Coefficient of Variation, or `"rcvq"`, `"rcv_mad"`, `"sd"`, `"se"`, `"iqr"`, `"mad"`):
+
+```{r dr-multi-consensus, fig.height = 5.8}
+p_multi <- plot_dose_response(
+  long_df,
+  viable_markers = "E-Cadherin",
+  dead_markers = c("cCASP3", "E-Cadherin and cCASP3"),
+  control_treatment_name = "Control",
+  selected_treatments = "Paclitaxel",
+  method = "4pl",
+  show_ic50 = TRUE,
+  consensus_dispersion = "cv",
+  show_cv = TRUE
+)
+p_multi
+
+# Consensus IC50 from the combined markers:
+attr(p_multi, "consensus_ic50")[, c("PID", "ic50", "hill_slope", "bottom", "top")]
+
+# Per-point CV and dispersion metrics on the Consensus curve:
+head(attr(p_multi, "consensus_cv")[, c("PID", "Concentration1", "mean_pct_of_control", "sd", "cv", "rcvq", "rcv_mad")])
+```
+
+---
+
+## 4. Drug Panel & Cohort Overview Plots
+
+### Treatment $\times$ Concentration Heatmap (`plot_dose_response_heatmap()`)
+
+Summarize the drug screen across doses (`Paclitaxel` and `NIRAPARIB`), with `show_values = TRUE` to print mean `% of control` inside each tile (deepest blue highlights the strongest drug effect / lowest remaining viability):
+
+```{r dr-heatmap}
+norm_panel <- norm_df[norm_df$Treatment %in% c("Control", "Paclitaxel", "NIRAPARIB"), ]
+plot_dose_response_heatmap(norm_panel, show_values = TRUE)
+```
+
+### Ranked Treatment Summary with Statistical Comparisons (`plot_treatment_summary()`)
+
+Rank all treatments in the dataset by overall effect size and test each treatment against `Control` using Wilcoxon rank-sum (`stat_method = "wilcox"`) or $t$-tests (`stat_method = "t.test"`), with multiple-testing correction (`p_adjust_method = "BH"`, `"bonferroni"`, `"holm"`, `"none"`, etc.) and full test results stored in `attr(plot, "stats")`:
+
+```{r treatment-summary}
+p_sum <- plot_treatment_summary(
+  norm_df,
+  compare_to_control = TRUE,
+  stat_method = "wilcox",
+  p_adjust_method = "BH",
+  pvalue_label = "p.signif"
+)
+p_sum
+
+# Inspect raw p_value and BH-adjusted p_adj per treatment
+attr(p_sum, "stats")[, c("group", "p_value", "p_adj", "p_adjust_method", "label")]
+```
+
+### Patient $\times$ Treatment Cohort Heatmap (`plot_patient_heatmap()`)
+
+Compare patient-specific drug sensitivity profiles across the cohort (`B36`, `B37`, `B38`, `B39`, and `A8759`), with `compare_to_control = TRUE` and `p_adjust_method = "BH"` to annotate each tile with its BH-adjusted significance against `Control`:
+
+```{r patient-heatmap}
+plot_patient_heatmap(
+  norm_df,
+  show_values = TRUE,
+  compare_to_control = TRUE,
+  stat_method = "wilcox",
+  p_adjust_method = "BH",
+  pvalue_label = "p.signif"
+)
+```
+
+---
+
+## 5. Customizing Plots with `drugsens_theme()` and `drugsens_palette`
+
+Both `drugsens_theme()` and the colorblind-safe `drugsens_palette` are exported so you can build custom visualizations—such as comparing each patient's consensus $\text{IC}_{50}$—that match the rest of your `drugsens` report:
+
+```{r custom-theme, fig.height = 5}
+ic50_df <- attr(p_multi, "consensus_ic50")
+
+ggplot(ic50_df, aes(x = PID, y = ic50, fill = PID, color = PID)) +
+  geom_col(width = 0.42, alpha = 0.82, color = NA) +
+  geom_point(size = 3.4, shape = 21, color = "#fcfcfb", stroke = 0.6) +
+  geom_text(
+    aes(label = sprintf("%.1f uM", ic50)),
+    vjust = -0.8,
+    fontface = "bold",
+    size = 4.0,
+    color = "#0b0b0b"
+  ) +
+  scale_fill_manual(values = unname(drugsens_palette)) +
+  scale_color_manual(values = unname(drugsens_palette)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.22))) +
+  labs(
+    title = "Consensus Paclitaxel IC50 by Patient",
+    subtitle = "Calculated directly from the package dataset (E-Cadherin viable vs. cCASP3 + E-Cadherin/cCASP3 dead)",
+    x = "Patient ID",
+    y = "Consensus IC50 (uM)"
+  ) +
+  drugsens_theme() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    legend.position = "none"
+  )
+```

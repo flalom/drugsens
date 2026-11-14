@@ -8,7 +8,8 @@ plot_dose_response_heatmap(
   .data,
   concentration_column_name = "Concentration1",
   treatment_column_name = "Treatment",
-  control_treatment_name = "Control"
+  control_treatment_name = "Control",
+  show_values = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,9 @@ to "Concentration1".}
 
 \item{control_treatment_name}{Value identifying control/vehicle wells, excluded
 from the heatmap. Defaults to "Control".}
+
+\item{show_values}{Logical; whether to print the numeric mean \verb{\% of control}
+inside each heatmap tile. Defaults to \code{FALSE}.}
 }
 \value{
 A \code{ggplot} object.
