@@ -75,7 +75,7 @@ get_QC_plots(
 
 ### Comparing Multiple Doses or Treatments with Statistical Annotations
 
-When a patient has multiple treatments or doses (including a `Control` group), set `compare_to_control = TRUE` to automatically run a Wilcoxon rank-sum test (`stat_method = "wilcox"`) or $t$-test (`stat_method = "t.test"`) against `Control` within each marker facet:
+When a patient has multiple treatments or doses (including a `Control` group), set `compare_to_control = TRUE` to automatically run a Wilcoxon rank-sum test (`stat_method = "wilcox"`) or t-test (`stat_method = "t.test"`) against `Control` within each marker facet:
 
 ```{r qc-patient-stats}
 get_QC_plots(
@@ -86,7 +86,7 @@ get_QC_plots(
   control_treatment_name = "Control",
   stat_method = "wilcox",
   p_adjust_method = "BH",
-  pvalue_label = "p.signif",
+  pvalue_label = "p.adj.signif",
   save_plots = FALSE
 )
 ```

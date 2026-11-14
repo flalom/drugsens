@@ -6,7 +6,7 @@
 #' @return Invisibly returns the path to the generated script file.
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'   # Generate script in a temporary directory
 #'   generate_qupath_script()
 #'
@@ -17,6 +17,9 @@
 generate_qupath_script <- function(output_dir = NULL) {
   if(is.null(output_dir)) {
     output_dir <- tempdir()
+  }
+  if (!dir.exists(output_dir)) {
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   }
   output_file <- file.path(output_dir, "script_for_qupath.txt")
 
@@ -67,6 +70,7 @@ print "Done!"
     file = output_file
   )
   message("You can now take the script and personalize it to your needs")
-  message(paste0(Sys.time(), " The script file was generated here: ", output_file, "/"))
+  message(paste0(Sys.time(), " The script file was generated here: ", output_file))
   message(paste0(Sys.time(), " Please make sure to follow the name convention here proposed, or it might fail to get all the information"))
+  invisible(output_file)
 }

@@ -79,7 +79,9 @@ and plotted as error bars / point labels): \code{"cv"} (standard coefficient of
 variation \code{100 * SD / Mean}, default), \code{"rcvq"} (robust quartile CV
 \code{100 * 0.75 * IQR / Median}), \code{"rcv_mad"} (robust MAD CV \code{100 * MAD / Median}),
 \code{"sd"} (standard deviation), \code{"se"} (standard error), \code{"iqr"} (interquartile
-range), \code{"mad"} (median absolute deviation), or \code{"none"}.}
+range), \code{"mad"} (median absolute deviation), or \code{"none"}. Note that \code{rcvq} and
+\code{rcv_mad} require multiple marker pairs/replicates per dose (most informative
+when >= 3 values per dose are available).}
 
 \item{show_cv}{Logical; whether to print the per-point CV (or selected
 \code{consensus_dispersion} value) on the Consensus panel. Defaults to \code{TRUE}.}
@@ -97,11 +99,11 @@ Hill curve fitting (\code{method = "4pl"}), or linear trend lines (\code{method 
 }
 \examples{
 df <- data.frame(
-  PID = "PID1",
-  Treatment = c("Control", "DrugA", "DrugA", "DrugA"),
-  Concentration1 = c(NA, "1", "10", "100"),
-  marker_positivity = "cCASP3",
-  marker_positivity_ratio = c(10, 10, 20, 30)
+  PID = rep("PID1", 10),
+  Treatment = c("Control", "Control", rep("DrugA", 8)),
+  Concentration1 = c(NA, NA, "0.1", "0.1", "1", "1", "10", "10", "100", "100"),
+  marker_positivity = "Viability",
+  marker_positivity_ratio = c(10, 10, 9.5, 9.2, 7.0, 6.8, 3.0, 2.8, 1.0, 0.9)
 )
 normalized <- normalize_to_control(df)
 plot_dose_response(normalized)

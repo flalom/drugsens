@@ -98,7 +98,7 @@ get_QC_plots_parsed_merged_data <- function(.data,
       }
     }
     n_levels <- length(unique(data[[use_fill_var]]))
-    dodge_w <- 0.65
+    dodge_w <- if (n_levels > 4) 0.78 else 0.65
 
     p <- ggplot2::ggplot(
       data,

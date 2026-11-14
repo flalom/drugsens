@@ -56,6 +56,9 @@ drugsens_match_markers <- function(user_markers, available_markers, arg_name = "
 #'   Matches names with or without the `"_ratio_of_total_cells"` suffix.
 #' @param viable_markers Optional character vector of marker name(s) representing
 #'   viable target/cancer cells (e.g. `"EpCAM_E-Cadherin"` or `"E-Cadherin"`).
+#'   When multiple `viable_markers` and `dead_markers` are supplied, markers are
+#'   paired positionally if `length(viable_markers) == length(dead_markers)`;
+#'   otherwise all combinations are evaluated alongside a combined consensus panel.
 #' @param total_markers Optional character vector of marker name(s) representing
 #'   the total target cell population (e.g. `c("EpCAM_E-Cadherin", "cCASP3")`).
 #'   If `NULL` when `dead_markers` and `viable_markers` are provided, defaults to
@@ -109,7 +112,14 @@ normalize_to_control <- function(.data,
   }
 
   if (!is.null(selected_treatments)) {
-    keep_tr <- unique(c(control_treatment_name, as.character(selected_treatments)))
+    ctrl_vals_in_data <- if (any(.data[[treatment_column_name]] == control_treatment_name)) {
+      control_treatment_name
+    } else {
+      unique(.data[[treatment_column_name]][
+        tolower(as.character(.data[[treatment_column_name]])) == tolower(control_treatment_name)
+      ])
+    }
+    keep_tr <- unique(c(ctrl_vals_in_data, as.character(selected_treatments)))
     .data <- .data[.data[[treatment_column_name]] %in% keep_tr, , drop = FALSE]
     if (nrow(.data) < 1) {
       stop("No rows remaining after filtering for `selected_treatments` and `control_treatment_name`.")
@@ -118,7 +128,18 @@ normalize_to_control <- function(.data,
 
   is_control <- .data[[treatment_column_name]] == control_treatment_name
   if (!any(is_control)) {
-    stop(paste0("No rows found where ", treatment_column_name, " == '", control_treatment_name, "'"))
+    ci_match <- tolower(as.character(.data[[treatment_column_name]])) == tolower(control_treatment_name)
+    if (any(ci_match)) {
+      matched_name <- as.character(.data[[treatment_column_name]][which(ci_match)[1]])
+      warning(sprintf(
+        "No exact match for control_treatment_name = '%s'; matched '%s' case-insensitively.",
+        control_treatment_name, matched_name
+      ))
+      control_treatment_name <- matched_name
+      is_control <- ci_match
+    } else {
+      stop(paste0("No rows found where ", treatment_column_name, " == '", control_treatment_name, "'"))
+    }
   }
 
   long_format <- "marker_positivity_ratio" %in% colnames(.data)
@@ -181,9 +202,9 @@ normalize_to_control <- function(.data,
           d_lbl <- paste(gsub("_", " ", sub("_ratio_of_total_cells$", "", d_set)), collapse = " + ")
           if (!nzchar(v_lbl)) v_lbl <- "Target"
           label_override <- if (response_metric == "viability") {
-            sprintf("Viability (%s / [%s + %s])", v_lbl, v_lbl, d_lbl)
+            sprintf("Viability: %s / (%s + %s)", v_lbl, v_lbl, d_lbl)
           } else {
-            sprintf("Cell death (%s / [%s + %s])", d_lbl, v_lbl, d_lbl)
+            sprintf("Cell death: %s / (%s + %s)", d_lbl, v_lbl, d_lbl)
           }
         }
         panel_df[["marker_positivity"]] <- label_override
@@ -282,15 +303,69 @@ normalize_to_control <- function(.data,
   }
 
   for (col in value_columns) {
-    control_means <- tapply(.data[[col]][is_control], marker_key[is_control], mean, na.rm = TRUE)
+    ctrl_sub <- .data[[col]][is_control]
+    ctrl_grp <- droplevels(marker_key[is_control])
+    control_means <- tapply(ctrl_sub, ctrl_grp, mean, na.rm = TRUE)
+    key_chr <- as.character(marker_key)
+    matched_ctrl <- as.numeric(control_means[key_chr])
+
+    missing_or_bad <- is.na(matched_ctrl) | !is.finite(matched_ctrl) | matched_ctrl <= 0
+    if (any(missing_or_bad)) {
+      bad_groups <- paste(unique(key_chr[missing_or_bad]), collapse = ", ")
+      warning(sprintf(
+        "Missing, non-finite, or non-positive control mean in column '%s' for group(s): %s. Setting pct_of_control to NA.",
+        col, bad_groups
+      ))
+    }
     out_col <- if (long_format) "pct_of_control" else paste0(col, "_pct_of_control")
-    .data[[out_col]] <- as.vector(100 * .data[[col]] / control_means[as.character(marker_key)])
+    pct_vals <- ifelse(missing_or_bad, NA_real_, 100 * .data[[col]] / matched_ctrl)
+    .data[[out_col]] <- as.vector(pct_vals)
   }
 
   return(.data)
 }
 
-# Internal 4-parameter log-logistic (Hill) curve fitter via stats::optim
+# Standardize concentration column when a paired unit column (e.g. ConcentrationUnits1) is present
+drugsens_standardize_conc <- function(df, conc_col) {
+  unit_col <- if (conc_col == "Concentration1" && "ConcentrationUnits1" %in% colnames(df)) {
+    "ConcentrationUnits1"
+  } else if (conc_col == "Concentration2" && "ConcentrationUnits2" %in% colnames(df)) {
+    "ConcentrationUnits2"
+  } else {
+    NULL
+  }
+  if (is.null(unit_col)) return(list(data = df, unit = NULL))
+
+  raw_u <- as.character(df[[unit_col]])
+  valid_u <- unique(raw_u[!is.na(raw_u) & nzchar(raw_u)])
+  if (length(valid_u) == 0) return(list(data = df, unit = NULL))
+  if (length(valid_u) == 1) return(list(data = df, unit = valid_u[1]))
+
+  scale_map <- c(mm = 1000, um = 1, nm = 1e-3, pm = 1e-6)
+  low_u <- tolower(raw_u)
+  known <- is.na(raw_u) | !nzchar(raw_u) | (low_u %in% names(scale_map))
+  if (!all(known)) {
+    warning("Unrecognized concentration units encountered; plotting concentrations without unit conversion.")
+    return(list(data = df, unit = NULL))
+  }
+
+  factors <- unname(scale_map[low_u])
+  factors[is.na(factors)] <- 1
+  uniq_factors <- unique(factors[!is.na(raw_u) & nzchar(raw_u)])
+  if (length(uniq_factors) == 1 && uniq_factors[1] == 1) {
+    return(list(data = df, unit = "uM"))
+  }
+
+  num_c <- suppressWarnings(as.numeric(df[[conc_col]]))
+  df[[conc_col]] <- num_c * factors
+  df[[unit_col]] <- ifelse(is.na(raw_u) | !nzchar(raw_u), raw_u, "uM")
+  message("Multiple concentration units detected; converted concentrations to uM for consistent plotting.")
+  list(data = df, unit = "uM")
+}
+
+# Internal 4-parameter log-logistic (Hill) curve fitter via stats::optim.
+# Parameterizes top = bottom + span (span >= 0) to guarantee 0 <= bottom <= top
+# across both decreasing (hill > 0) and increasing (hill < 0) dose-response curves.
 drugsens_fit_4pl_group <- function(conc, resp) {
   valid <- is.finite(conc) & conc > 0 & is.finite(resp)
   conc <- conc[valid]
@@ -298,50 +373,63 @@ drugsens_fit_4pl_group <- function(conc, resp) {
   if (length(unique(conc)) < 3) return(NULL)
 
   log_c <- log10(conc)
-  y_min <- min(resp, na.rm = TRUE)
+  y_min <- max(0, min(resp, na.rm = TRUE))
   y_max <- max(resp, na.rm = TRUE)
-  if (y_max == y_min) return(NULL)
-
-  # Direction of response (increasing vs decreasing with concentration)
-  cor_dir <- suppressWarnings(stats::cor(log_c, resp))
-  init_slope <- if (!is.na(cor_dir) && cor_dir < 0) 1.5 else -1.5
-  init_par <- c(bottom = y_min, top = y_max, log_ic50 = stats::median(log_c), hill = init_slope)
+  if (y_max <= min(resp, na.rm = TRUE)) return(NULL)
 
   obj_fn <- function(par) {
     bottom <- par[1]
-    top <- par[2]
+    span <- par[2]
     log_ic50 <- par[3]
     hill <- par[4]
-    pred <- bottom + (top - bottom) / (1 + 10^((log_c - log_ic50) * hill))
+    pred <- bottom + span / (1 + 10^((log_c - log_ic50) * hill))
     sum((resp - pred)^2)
   }
 
-  fit <- tryCatch(
-    stats::optim(
-      par = init_par,
-      fn = obj_fn,
-      method = "L-BFGS-B",
-      lower = c(min(0, y_min - 20), y_min, min(log_c) - 2, -10),
-      upper = c(y_max, max(200, y_max + 50), max(log_c) + 2, 10)
-    ),
-    error = function(e) NULL
-  )
-  if (is.null(fit)) return(NULL)
+  lower_b <- c(0, 0, min(log_c) - 2, -10)
+  upper_b <- c(y_max, max(200, y_max + 50), max(log_c) + 2, 10)
+  span_init <- max(1e-3, y_max - y_min)
+  cor_dir <- suppressWarnings(stats::cor(log_c, resp))
+  slopes <- if (!is.na(cor_dir) && cor_dir < 0) c(1.5, -1.5) else c(-1.5, 1.5)
 
-  grid_log_c <- seq(min(log_c), max(log_c), length.out = 100)
-  pred_y <- fit$par[1] + (fit$par[2] - fit$par[1]) / (1 + 10^((grid_log_c - fit$par[3]) * fit$par[4]))
+  fits <- lapply(slopes, function(sl) {
+    init_par <- c(bottom = min(y_min, upper_b[1]), span = span_init, log_ic50 = stats::median(log_c), hill = sl)
+    tryCatch(
+      stats::optim(
+        par = init_par,
+        fn = obj_fn,
+        method = "L-BFGS-B",
+        lower = lower_b,
+        upper = upper_b
+      ),
+      error = function(e) NULL
+    )
+  })
+  fits <- Filter(function(f) !is.null(f) && all(is.finite(f$par)) && is.finite(f$value), fits)
+  if (length(fits) == 0) return(NULL)
+  fit <- fits[[which.min(vapply(fits, function(f) f$value, numeric(1)))]]
 
   bot_v <- unname(fit$par[1])
-  top_v <- unname(fit$par[2])
+  top_v <- bot_v + unname(fit$par[2])
   log_ec50 <- unname(fit$par[3])
   hill_v <- unname(fit$par[4])
-  if (min(bot_v, top_v) < 50 && max(bot_v, top_v) > 50 && abs(hill_v) > 1e-3) {
+
+  grid_log_c <- seq(min(log_c), max(log_c), length.out = 100)
+  pred_y <- bot_v + (top_v - bot_v) / (1 + 10^((grid_log_c - log_ec50) * hill_v))
+  pred_rng <- range(pred_y, na.rm = TRUE)
+
+  ic50_reached <- (bot_v < 50) && (top_v > 50) &&
+    (pred_rng[1] <= 50) && (pred_rng[2] >= 50) &&
+    (abs(hill_v) > 1e-3)
+
+  if (ic50_reached) {
     ratio_50 <- (top_v - 50) / (50 - bot_v)
-    ic50_val <- if (ratio_50 > 0) 10^(log_ec50 + log10(ratio_50) / hill_v) else 10^log_ec50
-    y_50_val <- 50
+    ic50_val <- if (is.finite(ratio_50) && ratio_50 > 0) 10^(log_ec50 + log10(ratio_50) / hill_v) else NA_real_
+    y_50_val <- if (is.finite(ic50_val)) 50 else NA_real_
+    if (!is.finite(ic50_val)) ic50_reached <- FALSE
   } else {
-    ic50_val <- 10^log_ec50
-    y_50_val <- (bot_v + top_v) / 2
+    ic50_val <- NA_real_
+    y_50_val <- NA_real_
   }
 
   list(
@@ -357,6 +445,8 @@ drugsens_fit_4pl_group <- function(conc, resp) {
       ec50 = 10^log_ec50,
       y_ic50 = y_50_val,
       hill_slope = hill_v,
+      converged = (fit$convergence == 0),
+      ic50_reached = ic50_reached,
       stringsAsFactors = FALSE
     )
   )
@@ -410,22 +500,24 @@ drugsens_fit_4pl_group <- function(conc, resp) {
 #'   variation `100 * SD / Mean`, default), `"rcvq"` (robust quartile CV
 #'   `100 * 0.75 * IQR / Median`), `"rcv_mad"` (robust MAD CV `100 * MAD / Median`),
 #'   `"sd"` (standard deviation), `"se"` (standard error), `"iqr"` (interquartile
-#'   range), `"mad"` (median absolute deviation), or `"none"`.
+#'   range), `"mad"` (median absolute deviation), or `"none"`. Note that `rcvq` and
+#'   `rcv_mad` require multiple marker pairs/replicates per dose (most informative
+#'   when >= 3 values per dose are available).
 #' @param show_cv Logical; whether to print the per-point CV (or selected
 #'   `consensus_dispersion` value) on the Consensus panel. Defaults to `TRUE`.
 #' @importFrom ggplot2 ggplot aes geom_point geom_smooth geom_hline geom_line
-#'             geom_vline geom_errorbar geom_text facet_wrap labs scale_x_log10
+#'             geom_vline geom_errorbar geom_label geom_text facet_wrap labs scale_x_log10
 #' @importFrom stats optim cor median IQR mad approx
 #' @return A `ggplot` object (with `attr(plot, "ic50")`, `attr(plot, "consensus_ic50")`,
 #'   and `attr(plot, "consensus_cv")` populated).
 #' @export
 #' @examples
 #' df <- data.frame(
-#'   PID = "PID1",
-#'   Treatment = c("Control", "DrugA", "DrugA", "DrugA"),
-#'   Concentration1 = c(NA, "1", "10", "100"),
-#'   marker_positivity = "cCASP3",
-#'   marker_positivity_ratio = c(10, 10, 20, 30)
+#'   PID = rep("PID1", 10),
+#'   Treatment = c("Control", "Control", rep("DrugA", 8)),
+#'   Concentration1 = c(NA, NA, "0.1", "0.1", "1", "1", "10", "10", "100", "100"),
+#'   marker_positivity = "Viability",
+#'   marker_positivity_ratio = c(10, 10, 9.5, 9.2, 7.0, 6.8, 3.0, 2.8, 1.0, 0.9)
 #' )
 #' normalized <- normalize_to_control(df)
 #' plot_dose_response(normalized)
@@ -476,6 +568,9 @@ plot_dose_response <- function(.data,
   }
 
   plot_data <- .data[.data[[treatment_column_name]] != control_treatment_name, ]
+  std <- drugsens_standardize_conc(plot_data, concentration_column_name)
+  plot_data <- std$data
+  conc_unit <- std$unit
   plot_data[[concentration_column_name]] <- suppressWarnings(as.numeric(plot_data[[concentration_column_name]]))
   plot_data <- plot_data[!is.na(plot_data[[concentration_column_name]]) &
                            is.finite(plot_data[["pct_of_control"]]), ]
@@ -493,6 +588,8 @@ plot_dose_response <- function(.data,
   } else {
     unique(plot_data[["marker_positivity"]])
   }
+  is_cell_death <- (response_metric == "cell_death") ||
+    all(grepl("^Cell death|^Consensus Cell Death", as.character(plot_data[["marker_positivity"]])))
 
   p <- ggplot2::ggplot(plot_data, ggplot2::aes(
     x = .data[[concentration_column_name]],
@@ -500,8 +597,13 @@ plot_dose_response <- function(.data,
     color = .data[[patient_column_name]],
     fill = .data[[patient_column_name]]
   )) +
-    ggplot2::geom_hline(yintercept = 100, color = "#8c8b82", linetype = "dashed", linewidth = 0.6) +
-    ggplot2::geom_hline(yintercept = 50, color = "#52514e", linetype = "longdash", linewidth = 0.65) +
+    ggplot2::geom_hline(yintercept = 100, color = "#8c8b82", linetype = "dashed", linewidth = 0.6)
+
+  if (!is_cell_death) {
+    p <- p + ggplot2::geom_hline(yintercept = 50, color = "#52514e", linetype = "longdash", linewidth = 0.65)
+  }
+
+  p <- p +
     ggplot2::geom_point(
       alpha = 0.55,
       size = 2.1,
@@ -623,14 +725,25 @@ plot_dose_response <- function(.data,
       )
       if (show_cv && has_indiv) {
         cv_pill_rows <- list()
+        disp_prefix <- switch(
+          consensus_dispersion,
+          cv = "CV",
+          rcvq = "RCVQ",
+          rcv_mad = "RCV",
+          sd = "SD",
+          se = "SE",
+          iqr = "IQR",
+          mad = "MAD",
+          ""
+        )
         for (cc_val in sort(unique(consensus_cv_df[[concentration_column_name]]))) {
           sub_cc <- consensus_cv_df[consensus_cv_df[[concentration_column_name]] == cc_val, , drop = FALSE]
           m_val <- mean(sub_cc[["metric_value"]], na.rm = TRUE)
           if (!is.finite(m_val)) next
           lbl_cc <- if (consensus_dispersion %in% c("cv", "rcvq", "rcv_mad")) {
-            sprintf("%.0f%%", m_val)
+            sprintf("%s %.0f%%", disp_prefix, m_val)
           } else {
-            sprintf("%.1f", m_val)
+            sprintf("%s %.1f", disp_prefix, m_val)
           }
           pill_row <- data.frame(
             label_y = max(sub_cc[["ymax"]], na.rm = TRUE) + 5.5,
@@ -741,60 +854,74 @@ plot_dose_response <- function(.data,
         inherit.aes = FALSE,
         linewidth = 1.05
       )
-      if (show_ic50 && nrow(ic50_table) > 0) {
-        p <- p + ggplot2::geom_vline(
-          data = ic50_table,
-          ggplot2::aes(xintercept = .data[["ic50"]], color = .data[[patient_column_name]]),
-          linetype = "dotted",
-          linewidth = 0.75,
-          alpha = 0.85
-        )
+      if (show_ic50 && nrow(ic50_table) > 0 && !is_cell_death) {
+        ic50_valid <- ic50_table[is.finite(ic50_table[["ic50"]]) & is.finite(ic50_table[["y_ic50"]]), , drop = FALSE]
+        if (nrow(ic50_valid) > 0) {
+          p <- p + ggplot2::geom_vline(
+            data = ic50_valid,
+            ggplot2::aes(xintercept = .data[["ic50"]], color = .data[[patient_column_name]]),
+            linetype = "dotted",
+            linewidth = 0.75,
+            alpha = 0.85
+          )
+        }
       }
     }
   }
 
-  # Bold 50% response point on every curve
-  if (length(points_50_list) > 0) {
+  # Bold 50% response point on curves that cross 50%
+  if (!is_cell_death && length(points_50_list) > 0) {
     pts_50_df <- do.call(rbind, points_50_list)
-    if (is.factor(plot_data[["marker_positivity"]])) {
-      pts_50_df[["marker_positivity"]] <- factor(pts_50_df[["marker_positivity"]], levels = mk_vals)
+    pts_50_df <- pts_50_df[is.finite(pts_50_df[["ic50"]]) & is.finite(pts_50_df[["y_ic50"]]), , drop = FALSE]
+    if (nrow(pts_50_df) > 0) {
+      if (is.factor(plot_data[["marker_positivity"]])) {
+        pts_50_df[["marker_positivity"]] <- factor(pts_50_df[["marker_positivity"]], levels = mk_vals)
+      }
+      p <- p + ggplot2::geom_point(
+        data = pts_50_df,
+        ggplot2::aes(
+          x = .data[["ic50"]],
+          y = .data[["y_ic50"]],
+          fill = .data[[patient_column_name]]
+        ),
+        inherit.aes = FALSE,
+        shape = 21,
+        size = 3.9,
+        stroke = 1.25,
+        color = "#0b0b0b"
+      )
     }
-    p <- p + ggplot2::geom_point(
-      data = pts_50_df,
-      ggplot2::aes(
-        x = .data[["ic50"]],
-        y = .data[["y_ic50"]],
-        fill = .data[[patient_column_name]]
-      ),
-      inherit.aes = FALSE,
-      shape = 21,
-      size = 3.9,
-      stroke = 1.25,
-      color = "#0b0b0b"
-    )
   }
 
   n_facets <- length(unique(plot_data[["marker_positivity"]]))
-  wrap_w <- if (n_facets == 1) 60 else 28
+  wrap_w <- if (n_facets == 1) 60 else 32
   facet_scales <- if ("is_consensus" %in% colnames(plot_data) ||
                         any(grepl("^Consensus", as.character(plot_data[["marker_positivity"]])))) {
     "fixed"
   } else {
     "free_y"
   }
-  sub_txt <- "Dashed = 100% baseline | Long-dash & bold ring = 50% response (IC50)"
+  sub_txt <- if (is_cell_death) {
+    "Dashed = 100% control baseline"
+  } else {
+    "Dashed = 100% baseline | Long-dash & bold ring = 50% response (IC50)"
+  }
   if (nrow(consensus_cv_df) > 0 && any(!is_cons_vec)) {
     cv_tag <- if (n_patients > 1) paste0("mean ", toupper(consensus_dispersion)) else toupper(consensus_dispersion)
     sub_txt <- paste0(sub_txt, " | Consensus labels = ", cv_tag)
   }
-  p <- p +
-    drugsens_scale("color", n_patients) +
-    drugsens_scale("fill", n_patients) +
-    ggplot2::facet_wrap(
-      ~marker_positivity,
-      scales = facet_scales,
-      labeller = drugsens_wrap_labeller(wrap_w, strip_ratio_suffix = TRUE)
-    ) +
+  x_lab <- if (!is.null(conc_unit)) paste0("Concentration (", conc_unit, ")") else "Concentration"
+  y_scale <- if (is_cell_death) {
+    ggplot2::scale_y_continuous(
+      breaks = function(lims) {
+        b <- pretty(lims, 4)
+        b <- b[b >= lims[1] & b <= lims[2] & abs(b - 100) > 8]
+        sort(unique(c(b, if (lims[1] <= 100 && lims[2] >= 100) 100 else NULL)))
+      },
+      labels = function(y) paste0(round(y, 0), "%"),
+      expand = ggplot2::expansion(mult = c(0.06, 0.15))
+    )
+  } else {
     ggplot2::scale_y_continuous(
       breaks = function(lims) {
         b <- pretty(lims, 4)
@@ -804,11 +931,21 @@ plot_dose_response <- function(.data,
       },
       labels = function(y) ifelse(round(y, 0) == 50, "50% (IC50)", paste0(round(y, 0), "%")),
       expand = ggplot2::expansion(mult = c(0.06, 0.15))
+    )
+  }
+  p <- p +
+    drugsens_scale("color", n_patients) +
+    drugsens_scale("fill", n_patients) +
+    ggplot2::facet_wrap(
+      ~marker_positivity,
+      scales = facet_scales,
+      labeller = drugsens_wrap_labeller(wrap_w, strip_ratio_suffix = TRUE)
     ) +
+    y_scale +
     ggplot2::labs(
       title = if (method == "4pl") "Dose response (4PL Hill fit)" else "Dose response",
       subtitle = sub_txt,
-      x = "Concentration",
+      x = x_lab,
       y = "Response (% of control)",
       color = "Patient",
       fill = "Patient"
@@ -881,6 +1018,9 @@ plot_dose_response_heatmap <- function(.data,
   }
 
   plot_data <- .data[.data[[treatment_column_name]] != control_treatment_name, ]
+  std <- drugsens_standardize_conc(plot_data, concentration_column_name)
+  plot_data <- std$data
+  conc_unit <- std$unit
   plot_data <- plot_data[is.finite(plot_data[["pct_of_control"]]), ]
 
   if (nrow(plot_data) < 1) {
@@ -905,7 +1045,8 @@ plot_dose_response_heatmap <- function(.data,
     )
   }
 
-  wrap_w <- if (length(unique(summary_data[["marker_positivity"]])) == 1) 60 else 22
+  x_lab <- if (!is.null(conc_unit)) paste0("Concentration (", conc_unit, ")") else "Concentration"
+  wrap_w <- if (length(unique(summary_data[["marker_positivity"]])) == 1) 60 else 32
   p <- ggplot2::ggplot(summary_data, ggplot2::aes(
     x = .data[[concentration_column_name]],
     y = .data[[treatment_column_name]],
@@ -915,7 +1056,7 @@ plot_dose_response_heatmap <- function(.data,
     ggplot2::facet_wrap(~marker_positivity, labeller = drugsens_wrap_labeller(wrap_w, strip_ratio_suffix = TRUE)) +
     ggplot2::scale_fill_gradientn(colors = drugsens_sequential_blue, name = "% of control") +
     ggplot2::scale_y_discrete(labels = function(x) drugsens_wrap_text(x, 16)) +
-    ggplot2::labs(title = "Dose response overview", x = "Concentration", y = "Treatment") +
+    ggplot2::labs(title = "Dose response overview", x = x_lab, y = "Treatment") +
     drugsens_theme()
 
   if (show_values) {
@@ -959,8 +1100,16 @@ plot_dose_response_heatmap <- function(.data,
 #'   `stats::p.adjust()` across treatments within each marker facet. Supports
 #'   `"BH"` (Benjamini-Hochberg FDR, default), `"bonferroni"`, `"holm"`, `"fdr"`,
 #'   `"hochberg"`, `"hommel"`, `"BY"`, or `"none"`.
-#' @param pvalue_label Format for p-value annotations: `"p.signif"` (`*`, `**`, `***`, `ns`),
-#'   `"p.format"`, `"p.adj.signif"`, or `"p.adj.format"`. Defaults to `"p.signif"`.
+#' @param pvalue_label Format for p-value annotations: `"p.adj.signif"` (adjusted `*`,
+#'   `**`, `***`, `ns`, default), `"p.signif"` (unadjusted), `"p.adj.format"`, or
+#'   `"p.format"`.
+#' @details
+#' When multiple drug concentrations or imaged fields of view are present in `.data`,
+#' `compare_to_control = TRUE` pools all normalized observations for each treatment
+#' against `control_treatment_name` to test for an overall treatment effect across
+#' the tested condition. To test specific concentrations individually without pooling
+#' across doses, subset `.data` to a single concentration first or use
+#' `get_QC_plots(..., x_plot_var = "Treatment_complete", compare_to_control = TRUE)`.
 #' @importFrom ggplot2 ggplot aes geom_col geom_errorbar geom_hline geom_text
 #'             facet_wrap labs coord_flip scale_y_continuous expansion
 #' @importFrom stats aggregate sd reorder p.adjust p.adjust.methods
@@ -981,7 +1130,7 @@ plot_treatment_summary <- function(.data,
                                    compare_to_control = FALSE,
                                    stat_method = c("wilcox", "t.test"),
                                    p_adjust_method = "BH",
-                                   pvalue_label = c("p.signif", "p.format", "p.adj.signif", "p.adj.format")) {
+                                   pvalue_label = c("p.adj.signif", "p.signif", "p.adj.format", "p.format")) {
   stat_method <- match.arg(stat_method)
   p_adjust_method <- match.arg(p_adjust_method, stats::p.adjust.methods)
   pvalue_label <- match.arg(pvalue_label)
@@ -1014,7 +1163,7 @@ plot_treatment_summary <- function(.data,
     summary_data[[treatment_column_name]], summary_data[["mean_pct_of_control"]]
   )
 
-  wrap_w <- if (length(unique(summary_data[["marker_positivity"]])) == 1) 60 else 22
+  wrap_w <- if (length(unique(summary_data[["marker_positivity"]])) == 1) 60 else 32
   p <- ggplot2::ggplot(summary_data, ggplot2::aes(
     x = .data[[treatment_column_name]],
     y = .data[["mean_pct_of_control"]]
@@ -1101,8 +1250,15 @@ plot_treatment_summary <- function(.data,
 #'   `stats::p.adjust()` across treatments within each patient and marker facet.
 #'   Supports `"BH"` (default), `"bonferroni"`, `"holm"`, `"fdr"`, `"hochberg"`,
 #'   `"hommel"`, `"BY"`, or `"none"`.
-#' @param pvalue_label Format for p-value annotations: `"p.signif"` (`*`, `**`, `***`, `ns`),
-#'   `"p.format"`, `"p.adj.signif"`, or `"p.adj.format"`. Defaults to `"p.signif"`.
+#' @param pvalue_label Format for p-value annotations: `"p.adj.signif"` (adjusted `*`,
+#'   `**`, `***`, `ns`, default), `"p.signif"` (unadjusted), `"p.adj.format"`, or
+#'   `"p.format"`.
+#' @details
+#' When multiple drug concentrations or imaged fields of view are present per patient,
+#' `compare_to_control = TRUE` pools observations across doses and fields of view within
+#' each patient and treatment against `control_treatment_name`. For dose-specific tests,
+#' filter `.data` to a single concentration beforehand or use
+#' `get_QC_plots(..., x_plot_var = "Treatment_complete", compare_to_control = TRUE)`.
 #' @importFrom ggplot2 ggplot aes geom_tile geom_text facet_wrap labs scale_fill_gradientn theme
 #'             element_text
 #' @importFrom stats aggregate
@@ -1125,7 +1281,7 @@ plot_patient_heatmap <- function(.data,
                                  compare_to_control = FALSE,
                                  stat_method = c("wilcox", "t.test"),
                                  p_adjust_method = "BH",
-                                 pvalue_label = c("p.signif", "p.format", "p.adj.signif", "p.adj.format")) {
+                                 pvalue_label = c("p.adj.signif", "p.signif", "p.adj.format", "p.format")) {
   stat_method <- match.arg(stat_method)
   p_adjust_method <- match.arg(p_adjust_method, stats::p.adjust.methods)
   pvalue_label <- match.arg(pvalue_label)
@@ -1181,7 +1337,7 @@ plot_patient_heatmap <- function(.data,
     }
   }
 
-  wrap_w <- if (length(unique(summary_data[["marker_positivity"]])) == 1) 60 else 22
+  wrap_w <- if (length(unique(summary_data[["marker_positivity"]])) == 1) 60 else 32
   p <- ggplot2::ggplot(summary_data, ggplot2::aes(
     x = .data[[treatment_column_name]],
     y = .data[[patient_column_name]],

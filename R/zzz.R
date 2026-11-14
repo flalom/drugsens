@@ -1,13 +1,27 @@
+utils::globalVariables(c(
+  "marker_positivity_ratio",
+  "marker_positivity",
+  "x",
+  "y",
+  "Name",
+  ".data"
+))
+
+.drugsens_default_relabeling <- function() {
+  list(
+    "PathCellObject" = "onlyDAPIPositve",
+    "cCasp3" = "cCASP3",
+    "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
+    "EpCAM_E-Cadherin" = "E-Cadherin",
+    "EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3"
+  )
+}
+
+.drugsens_env <- new.env(parent = emptyenv())
+.drugsens_env$list_of_relabeling <- .drugsens_default_relabeling()
+
 .onLoad <- function(libname, pkgname) {
-  utils::globalVariables(c(
-    "list_of_relabeling",
-    "marker_positivity_ratio",
-    "marker_positivity",
-    "x",
-    "y",
-    "Name",
-    ".data"
-  ))
+  .drugsens_env$list_of_relabeling <- .drugsens_default_relabeling()
 }
 
 #' Colorblind-safe categorical palette for drugsens plots
@@ -95,20 +109,22 @@ drugsens_wrap_labeller <- function(width = 18, strip_ratio_suffix = TRUE) {
   ggplot2::as_labeller(function(x) drugsens_wrap_text(x, width, strip_ratio_suffix = strip_ratio_suffix))
 }
 
-# Manual discrete scale that falls back to ggplot2's default hues once the
-# data has more levels than the validated palette provides for.
+# Manual discrete scale that uses drugsens_palette for up to 8 levels and
+# falls back to a colorblind-safe Viridis palette for larger level counts.
 drugsens_scale <- function(aesthetic, values_needed, label_width = 20) {
+  if (!is.finite(values_needed) || values_needed < 1) return(NULL)
   scale_fn <- if (aesthetic == "fill") ggplot2::scale_fill_manual else ggplot2::scale_color_manual
-  if (values_needed <= length(drugsens_palette)) {
-    scale_fn(values = unname(drugsens_palette), labels = function(x) drugsens_wrap_text(x, label_width))
+  pal <- if (values_needed <= length(drugsens_palette)) {
+    unname(drugsens_palette)[seq_len(values_needed)]
   } else {
-    NULL
+    grDevices::hcl.colors(values_needed, palette = "Viridis")
   }
+  scale_fn(values = pal, labels = function(x) drugsens_wrap_text(x, label_width))
 }
 
 # Format p-value into concise significance stars or p-value string
 drugsens_format_pval <- function(p,
-                                 label_type = c("p.signif", "p.format", "p.adj.signif", "p.adj.format"),
+                                 label_type = c("p.adj.signif", "p.signif", "p.adj.format", "p.format"),
                                  is_adjusted = FALSE) {
   label_type <- match.arg(label_type)
   prefix <- if (is_adjusted || label_type %in% c("p.adj.signif", "p.adj.format")) "padj" else "p"
@@ -134,7 +150,7 @@ drugsens_compare_to_control <- function(data,
                                         control_name = "Control",
                                         method = c("wilcox", "t.test"),
                                         p_adjust_method = "BH",
-                                        label_type = c("p.signif", "p.format", "p.adj.signif", "p.adj.format")) {
+                                        label_type = c("p.adj.signif", "p.signif", "p.adj.format", "p.format")) {
   method <- match.arg(method)
   p_adjust_method <- match.arg(p_adjust_method, stats::p.adjust.methods)
   label_type <- match.arg(label_type)
@@ -178,9 +194,13 @@ drugsens_compare_to_control <- function(data,
       fc_df <- do.call(rbind, fc_rows)
       fc_df[["p_adj"]] <- stats::p.adjust(fc_df[["p_value"]], method = p_adjust_method)
       fc_df[["p_adjust_method"]] <- p_adjust_method
-      use_adj <- p_adjust_method != "none" || label_type %in% c("p.adj.signif", "p.adj.format")
+      use_adj <- label_type %in% c("p.adj.signif", "p.adj.format")
       p_for_label <- if (use_adj) fc_df[["p_adj"]] else fc_df[["p_value"]]
-      fc_df[["label"]] <- drugsens_format_pval(p_for_label, label_type = label_type, is_adjusted = use_adj)
+      fc_df[["label"]] <- drugsens_format_pval(
+        p_for_label,
+        label_type = label_type,
+        is_adjusted = use_adj && p_adjust_method != "none"
+      )
       out_list[[length(out_list) + 1]] <- fc_df
     }
   }

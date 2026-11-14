@@ -12,26 +12,24 @@ SystemRequirements: QuPath (>= 0.4.0)
 Authors@R: 
     person("Flavio", "Lombardo", , "fl@flaviolombardo.site", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4853-6838"))
 URL: https://flalom.github.io/drugsens/, https://github.com/flalom/drugsens
-Maintainer: Flavio Lombardo <fl@flaviolombardo.site>
 License: MIT + file LICENSE
 Imports:
     dplyr,
     ggplot2,
-    ggpubr,
-    knitr,
-    roxygen2,
+    grDevices,
     stats,
     stringr,
     tidyr,
     tidyselect,
-    utils,
-    testthat (>= 3.0.0)
+    utils
 Depends: 
     R (>= 4.2)
 Encoding: UTF-8
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 Suggests:
-    rmarkdown
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.1

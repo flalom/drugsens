@@ -18,7 +18,7 @@ change_data_format_to_longer(
 
 \item{unique_name_row_identifier}{String that indicates the unique identifier for each image, defaults as "filter_image"}
 
-\item{additional_columns}{columns that can be additionally added to the longer formatted data.frame, "Defaults as c("Treatment", "PID", "Image_number", "Tissue", "Concentration", "DOC")"}
+\item{additional_columns}{Logical; whether to keep all standard metadata columns (\code{PID}, \code{Date}, \code{DOC}, \code{Tissue}, \code{Image_number}, \code{Treatment}, \code{Concentration1}, \code{Concentration2}, \code{ConcentrationUnits1}, \code{ConcentrationUnits2}, \code{ReplicaOrNot}, \code{Treatment_complete}) in the long-format output. Defaults to \code{TRUE}.}
 }
 \value{
 A \code{dataframe}/\code{tibble}.
@@ -31,15 +31,6 @@ Reformat the counts data in longer format
 }
 \examples{
 \donttest{
-# Set up relabeling list
-list_of_relabeling <- list(
-  "PathCellObject" = "onlyDAPIPositve",
-  "cCasp3" = "cCASP3",
-  "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
-  "EpCAM_E-Cadherin" = "E-Cadherin",
-  "EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3"
-)
-
 # Load and process example data
 bind_data <- data_binding(
   path_to_the_projects_folder = system.file("extdata/to_merge/", package = "drugsens")

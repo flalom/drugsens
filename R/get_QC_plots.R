@@ -28,7 +28,8 @@ drugsens_order_dose_levels <- function(values, control_name = "Control") {
 #' @param colors A character vector of colors to supply to personalize the plot, defaults to
 #'   `unname(drugsens_palette)` (8-color CVD-safe palette).
 #' @param save_plots A Boolean value indicating if the plots should be saved or not (default is FALSE)
-#' @param folder_name A string indicating the name of the folder where to save the plots if save_plots is TRUE
+#' @param folder_name Directory where plots are saved when `save_plots = TRUE`.
+#'   Defaults to `file.path(tempdir(), "figures")` when `NULL`.
 #' @param isolate_a_specific_patient A string indicating the patient name to isolate for single plot case (default is NULL)
 #' @param x_plot_var A string indicating the treatment's full name for the QC plots (default is "Treatment_complete")
 #' @param compare_to_control Logical, whether to compute and display statistical comparisons
@@ -40,10 +41,9 @@ drugsens_order_dose_levels <- function(values, control_name = "Control") {
 #' @param p_adjust_method Multiple-testing correction method passed to `stats::p.adjust()`
 #'   across treatments within each marker facet. Supports `"BH"` (Benjamini-Hochberg FDR, default),
 #'   `"bonferroni"`, `"holm"`, `"fdr"`, `"hochberg"`, `"hommel"`, `"BY"`, or `"none"`.
-#' @param pvalue_label Format for p-value annotations: `"p.signif"` (`*`, `**`, `***`, `ns`),
-#'   `"p.format"`, `"p.adj.signif"`, or `"p.adj.format"`. Defaults to `"p.signif"`.
+#' @param pvalue_label Format for p-value annotations: `"p.adj.signif"` (adjusted `*`, `**`,
+#'   `***`, `ns`, default), `"p.signif"` (unadjusted), `"p.adj.format"`, or `"p.format"`.
 #' @import ggplot2
-#' @import ggpubr
 #' @importFrom dplyr filter
 #' @return When `save_plots = FALSE`, returns a `ggplot` object (if a single patient is plotted)
 #'   or a named list of `ggplot` objects (keyed by patient ID). When `save_plots = TRUE`,
@@ -84,7 +84,7 @@ get_QC_plots <- function(.data,
                          control_treatment_name = "Control",
                          stat_method = c("wilcox", "t.test"),
                          p_adjust_method = "BH",
-                         pvalue_label = c("p.signif", "p.format", "p.adj.signif", "p.adj.format")) {
+                         pvalue_label = c("p.adj.signif", "p.signif", "p.adj.format", "p.format")) {
 
   stat_method <- match.arg(stat_method)
   p_adjust_method <- match.arg(p_adjust_method, stats::p.adjust.methods)

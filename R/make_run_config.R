@@ -1,20 +1,26 @@
-#' Generates and use a config txt file
+#' Generates and loads a marker-relabeling configuration file
 #' @description
-#' When this function run the first time, it will generated a config.txt file in the user working directory.
-#' It will import the data config file into the use environment. This data will be used to change the column names
-#' of the imported dataset and change the name of the markers that is often incorrectly exported.
-#' @param overwrite_config Boolean, if TRUE the `config_drugsens.txt` will be overwritten (default is FALSE)
-#' @param forcePath String, Define a custom path for the config file
+#' Generates a `config_drugsens.txt` file in `tempdir()` (or in `forcePath` when
+#' specified) defining `list_of_relabeling`, evaluates it into an isolated local
+#' environment, and stores the relabeling map inside the package's internal
+#' configuration environment without modifying `.GlobalEnv`.
+#' @param overwrite_config Boolean; if TRUE an existing `config_drugsens.txt`
+#'   will be overwritten with the default template (default is FALSE).
+#' @param forcePath Optional directory path for `config_drugsens.txt`. Defaults
+#'   to `NULL`, which uses `tempdir()`.
 #' @export
 #' @return Invisibly returns the path to the configuration file.
 #' @examples
 #' \donttest{
-#' # Generate config in temporary directory
+#' # Generate and load config in a temporary directory
 #' make_run_config(forcePath = tempdir())
 #' }
 make_run_config <- function(overwrite_config = FALSE, forcePath = NULL) {
 
   currentPath <- if (is.null(forcePath)) tempdir() else forcePath
+  if (!dir.exists(currentPath)) {
+    dir.create(currentPath, recursive = TRUE, showWarnings = FALSE)
+  }
   config_file <- file.path(currentPath, "config_drugsens.txt")
 
   if (!file.exists(config_file) || overwrite_config) {
@@ -34,14 +40,22 @@ make_run_config <- function(overwrite_config = FALSE, forcePath = NULL) {
 
   tryCatch(
     expr = {
-      source(config_file, local = FALSE)
+      cfg_env <- new.env(parent = baseenv())
+      source(config_file, local = cfg_env)
+      if (exists("list_of_relabeling", envir = cfg_env, inherits = FALSE)) {
+        if (!is.list(cfg_env$list_of_relabeling)) {
+          stop("'list_of_relabeling' in config_drugsens.txt must be a list.")
+        }
+        .drugsens_env$list_of_relabeling <- cfg_env$list_of_relabeling
+      } else {
+        .drugsens_env$list_of_relabeling <- .drugsens_default_relabeling()
+      }
     },
     error = function(error) {
-      message("drugsens could not load the 'config_drugsens.txt' file.
-              Please generate a valid config file with the substitution
-              names from the dataframe and the name of the columns to use
-              for your project. Once the config file is available, re-run
-              make_run_config() to verify that the data was correctly read.")
+      message("drugsens could not load the 'config_drugsens.txt' file: ",
+              conditionMessage(error),
+              "\nPlease generate a valid config file with `list_of_relabeling` ",
+              "and re-run make_run_config() to verify that it is correctly read.")
     }
   )
 

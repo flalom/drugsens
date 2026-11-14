@@ -4,12 +4,18 @@
 \alias{process_file}
 \title{Process a Single File}
 \usage{
-process_file(file_path, extension)
+process_file(
+  file_path,
+  extension,
+  relabeling_map = .drugsens_env$list_of_relabeling
+)
 }
 \arguments{
 \item{file_path}{Path to the file}
 
 \item{extension}{String File extension to filter}
+
+\item{relabeling_map}{Named list mapping raw marker names to standardized names}
 }
 \value{
 dataframe

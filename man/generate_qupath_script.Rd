@@ -17,7 +17,7 @@ Generate a useful script to consistently save the output data from QuPath in .cs
 followed during the package development.
 }
 \examples{
-\dontrun{
+\donttest{
   # Generate script in a temporary directory
   generate_qupath_script()
 

@@ -44,7 +44,10 @@ dead/dying cells (e.g. \code{"cCASP3"} or \code{c("cCASP3", "E-Cadherin and cCAS
 Matches names with or without the \code{"_ratio_of_total_cells"} suffix.}
 
 \item{viable_markers}{Optional character vector of marker name(s) representing
-viable target/cancer cells (e.g. \code{"EpCAM_E-Cadherin"} or \code{"E-Cadherin"}).}
+viable target/cancer cells (e.g. \code{"EpCAM_E-Cadherin"} or \code{"E-Cadherin"}).
+When multiple \code{viable_markers} and \code{dead_markers} are supplied, markers are
+paired positionally if \code{length(viable_markers) == length(dead_markers)};
+otherwise all combinations are evaluated alongside a combined consensus panel.}
 
 \item{total_markers}{Optional character vector of marker name(s) representing
 the total target cell population (e.g. \code{c("EpCAM_E-Cadherin", "cCASP3")}).

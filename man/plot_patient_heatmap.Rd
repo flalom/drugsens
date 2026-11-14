@@ -13,7 +13,7 @@ plot_patient_heatmap(
   compare_to_control = FALSE,
   stat_method = c("wilcox", "t.test"),
   p_adjust_method = "BH",
-  pvalue_label = c("p.signif", "p.format", "p.adj.signif", "p.adj.format")
+  pvalue_label = c("p.adj.signif", "p.signif", "p.adj.format", "p.format")
 )
 }
 \arguments{
@@ -43,8 +43,9 @@ marker facet. Defaults to \code{FALSE}.}
 Supports \code{"BH"} (default), \code{"bonferroni"}, \code{"holm"}, \code{"fdr"}, \code{"hochberg"},
 \code{"hommel"}, \code{"BY"}, or \code{"none"}.}
 
-\item{pvalue_label}{Format for p-value annotations: \code{"p.signif"} (\code{*}, \verb{**}, \verb{***}, \code{ns}),
-\code{"p.format"}, \code{"p.adj.signif"}, or \code{"p.adj.format"}. Defaults to \code{"p.signif"}.}
+\item{pvalue_label}{Format for p-value annotations: \code{"p.adj.signif"} (adjusted \code{*},
+\verb{**}, \verb{***}, \code{ns}, default), \code{"p.signif"} (unadjusted), \code{"p.adj.format"}, or
+\code{"p.format"}.}
 }
 \value{
 A \code{ggplot} object (with \code{attr(plot, "stats")} populated when \code{compare_to_control = TRUE}).
@@ -53,6 +54,13 @@ A \code{ggplot} object (with \code{attr(plot, "stats")} populated when \code{com
 Summarizes \code{normalize_to_control()} output into a patient x treatment heatmap
 of the mean percent-of-control value (averaged across concentrations), a
 cohort-level view of how every patient responded to every drug in the panel.
+}
+\details{
+When multiple drug concentrations or imaged fields of view are present per patient,
+\code{compare_to_control = TRUE} pools observations across doses and fields of view within
+each patient and treatment against \code{control_treatment_name}. For dose-specific tests,
+filter \code{.data} to a single concentration beforehand or use
+\code{get_QC_plots(..., x_plot_var = "Treatment_complete", compare_to_control = TRUE)}.
 }
 \examples{
 df <- data.frame(

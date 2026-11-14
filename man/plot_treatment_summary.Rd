@@ -11,7 +11,7 @@ plot_treatment_summary(
   compare_to_control = FALSE,
   stat_method = c("wilcox", "t.test"),
   p_adjust_method = "BH",
-  pvalue_label = c("p.signif", "p.format", "p.adj.signif", "p.adj.format")
+  pvalue_label = c("p.adj.signif", "p.signif", "p.adj.format", "p.format")
 )
 }
 \arguments{
@@ -36,8 +36,9 @@ Defaults to \code{FALSE}.}
 \code{"BH"} (Benjamini-Hochberg FDR, default), \code{"bonferroni"}, \code{"holm"}, \code{"fdr"},
 \code{"hochberg"}, \code{"hommel"}, \code{"BY"}, or \code{"none"}.}
 
-\item{pvalue_label}{Format for p-value annotations: \code{"p.signif"} (\code{*}, \verb{**}, \verb{***}, \code{ns}),
-\code{"p.format"}, \code{"p.adj.signif"}, or \code{"p.adj.format"}. Defaults to \code{"p.signif"}.}
+\item{pvalue_label}{Format for p-value annotations: \code{"p.adj.signif"} (adjusted \code{*},
+\verb{**}, \verb{***}, \code{ns}, default), \code{"p.signif"} (unadjusted), \code{"p.adj.format"}, or
+\code{"p.format"}.}
 }
 \value{
 A \code{ggplot} object (with \code{attr(plot, "stats")} populated when \code{compare_to_control = TRUE}).
@@ -47,6 +48,14 @@ Summarizes \code{normalize_to_control()} output into one bar per treatment: the
 mean percent-of-control value across all concentrations and replicates, with
 a standard error bar, ranked from strongest to weakest effect. A quick way
 to rank an entire drug panel by response.
+}
+\details{
+When multiple drug concentrations or imaged fields of view are present in \code{.data},
+\code{compare_to_control = TRUE} pools all normalized observations for each treatment
+against \code{control_treatment_name} to test for an overall treatment effect across
+the tested condition. To test specific concentrations individually without pooling
+across doses, subset \code{.data} to a single concentration first or use
+\code{get_QC_plots(..., x_plot_var = "Treatment_complete", compare_to_control = TRUE)}.
 }
 \examples{
 df <- data.frame(

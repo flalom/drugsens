@@ -141,7 +141,7 @@ parsed_ctrl[, c("PID", "Tissue", "Treatment", "ReplicaOrNot", "Treatment_complet
 
 QuPath classifiers often export raw object class names such as `"PathCellObject"` (for cells positive only for nuclear DAPI) or composite classifier strings like `"E-Cadherin: cCASP3"`.
 
-`make_run_config()` creates a `config_drugsens.txt` file defining `list_of_relabeling`, a named list mapping raw QuPath `Name` strings to clean marker names:
+`make_run_config()` creates a `config_drugsens.txt` file in `tempdir()` (or `forcePath` when provided) defining `list_of_relabeling`, a named list mapping raw QuPath `Name` strings to clean marker names, and loads it into the package's internal configuration environment without modifying `.GlobalEnv`:
 
 ```{r config-example}
 cfg_dir <- tempdir()

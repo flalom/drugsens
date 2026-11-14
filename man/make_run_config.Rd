@@ -2,26 +2,29 @@
 % Please edit documentation in R/make_run_config.R
 \name{make_run_config}
 \alias{make_run_config}
-\title{Generates and use a config txt file}
+\title{Generates and loads a marker-relabeling configuration file}
 \usage{
 make_run_config(overwrite_config = FALSE, forcePath = NULL)
 }
 \arguments{
-\item{overwrite_config}{Boolean, if TRUE the \code{config_drugsens.txt} will be overwritten (default is FALSE)}
+\item{overwrite_config}{Boolean; if TRUE an existing \code{config_drugsens.txt}
+will be overwritten with the default template (default is FALSE).}
 
-\item{forcePath}{String, Define a custom path for the config file}
+\item{forcePath}{Optional directory path for \code{config_drugsens.txt}. Defaults
+to \code{NULL}, which uses \code{tempdir()}.}
 }
 \value{
 Invisibly returns the path to the configuration file.
 }
 \description{
-When this function run the first time, it will generated a config.txt file in the user working directory.
-It will import the data config file into the use environment. This data will be used to change the column names
-of the imported dataset and change the name of the markers that is often incorrectly exported.
+Generates a \code{config_drugsens.txt} file in \code{tempdir()} (or in \code{forcePath} when
+specified) defining \code{list_of_relabeling}, evaluates it into an isolated local
+environment, and stores the relabeling map inside the package's internal
+configuration environment without modifying \code{.GlobalEnv}.
 }
 \examples{
 \donttest{
-# Generate config in temporary directory
+# Generate and load config in a temporary directory
 make_run_config(forcePath = tempdir())
 }
 }

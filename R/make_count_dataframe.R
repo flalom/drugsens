@@ -45,9 +45,9 @@ make_count_dataframe <- function(.data, unique_name_row_identifier = "filter_ima
   # add sum of the markers
   counts_total$sum_cells <- apply(MARGIN = 1, X = counts_total[, markers_names], FUN = sum)
 
-  # Calculate the ratios
+  # Calculate the ratios (4 decimals preserves 0.01% precision for low-abundance markers)
   counts_total[paste0(markers_names, "_ratio_of_total_cells")] <-
-    round(counts_total[, markers_names] / counts_total[["sum_cells"]], 2)
+    round(counts_total[, markers_names] / counts_total[["sum_cells"]], 4)
 
   counts_total[[unique_name_row_identifier]] <- row.names(counts_total)
 

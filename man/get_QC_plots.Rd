@@ -16,7 +16,7 @@ get_QC_plots(
   control_treatment_name = "Control",
   stat_method = c("wilcox", "t.test"),
   p_adjust_method = "BH",
-  pvalue_label = c("p.signif", "p.format", "p.adj.signif", "p.adj.format")
+  pvalue_label = c("p.adj.signif", "p.signif", "p.adj.format", "p.format")
 )
 }
 \arguments{
@@ -30,7 +30,8 @@ merged data.frame that should be visualized}
 
 \item{save_plots}{A Boolean value indicating if the plots should be saved or not (default is FALSE)}
 
-\item{folder_name}{A string indicating the name of the folder where to save the plots if save_plots is TRUE}
+\item{folder_name}{Directory where plots are saved when \code{save_plots = TRUE}.
+Defaults to \code{file.path(tempdir(), "figures")} when \code{NULL}.}
 
 \item{x_plot_var}{A string indicating the treatment's full name for the QC plots (default is "Treatment_complete")}
 
@@ -49,8 +50,8 @@ or \code{"t.test"}.}
 across treatments within each marker facet. Supports \code{"BH"} (Benjamini-Hochberg FDR, default),
 \code{"bonferroni"}, \code{"holm"}, \code{"fdr"}, \code{"hochberg"}, \code{"hommel"}, \code{"BY"}, or \code{"none"}.}
 
-\item{pvalue_label}{Format for p-value annotations: \code{"p.signif"} (\code{*}, \verb{**}, \verb{***}, \code{ns}),
-\code{"p.format"}, \code{"p.adj.signif"}, or \code{"p.adj.format"}. Defaults to \code{"p.signif"}.}
+\item{pvalue_label}{Format for p-value annotations: \code{"p.adj.signif"} (adjusted \code{*}, \verb{**},
+\verb{***}, \code{ns}, default), \code{"p.signif"} (unadjusted), \code{"p.adj.format"}, or \code{"p.format"}.}
 }
 \value{
 When \code{save_plots = FALSE}, returns a \code{ggplot} object (if a single patient is plotted)

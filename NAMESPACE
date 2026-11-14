@@ -17,10 +17,6 @@ export(plot_patient_heatmap)
 export(plot_treatment_summary)
 export(string_parsing)
 import(ggplot2)
-import(ggpubr)
-import(knitr)
-import(roxygen2)
-import(testthat)
 importFrom(dplyr,
   filter,
   select
@@ -37,6 +33,7 @@ importFrom(ggplot2,
   geom_errorbar,
   geom_hline,
   geom_jitter,
+  geom_label,
   geom_line,
   geom_point,
   geom_smooth,
@@ -71,6 +68,7 @@ importFrom(stats,
 )
 importFrom(stringr,
   str_count,
+  str_detect,
   str_extract
 )
 importFrom(tidyr,pivot_longer)

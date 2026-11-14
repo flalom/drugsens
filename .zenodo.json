@@ -2,8 +2,8 @@
   "title": "drugsens: Automated Analysis of QuPath Output Data and Metadata Extraction",
   "description": "A comprehensive R package for analyzing microscopy data output from QuPath software, specifically designed for drug sensitivity analysis in patient-derived cancer models. The package implements the methodology described in Labrosse et al. (2024) for quantifying drug sensitivity in 3D patient-derived ovarian cancer models.",
   "upload_type": "software",
-  "publication_date": "2024-01-27",
-  "version": "0.1.0",
+  "publication_date": "2026-11-14",
+  "version": "0.2.0",
   "language": "eng",
   "keywords": [
     "R",
@@ -22,7 +22,6 @@
   "creators": [
     {
       "name": "Lombardo, Flavio",
-      "affiliation": "University of Basel & University Hospital Basel",
       "orcid": "0000-0002-4853-6838"
     }
   ],

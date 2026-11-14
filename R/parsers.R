@@ -2,10 +2,7 @@
 #' @description
 #' This function will parse the data from the Image name and will return the metadata there contained
 #' The metadata will be then associated to the count file as well
-#' @import knitr
-#' @import testthat
-#' @importFrom stringr str_extract
-#' @importFrom stringr str_count
+#' @importFrom stringr str_extract str_count str_detect
 #' @return A `dataframe`/`tibble`.
 #' @param .data dataframe with parsed metadata
 #' @export
@@ -29,63 +26,85 @@ string_parsing <- function(.data) {
     pattern = "series.\\d*"
   )
 
-  multiple_drugs <- list()
+  # Split image names on "_" once for positional token inspection
+  split_tokens <- strsplit(as.character(.data$Image), "_")
+  get_tok <- function(idx) {
+    vapply(split_tokens, function(x) if (length(x) >= idx) x[idx] else NA_character_, character(1))
+  }
 
   # extract information from the data
-  .data$PID <- sapply(strsplit(.data$Image, "_"), `[`, 1, simplify = FALSE) |> unlist()
-  .data$Tissue <- sapply(strsplit(.data$Image, "_"), `[`, 2, simplify = FALSE) |> unlist()
-  .data$Date1 <- str_extract(.data$Image, "\\d{4}.\\d{2}.\\d{2}")
-  .data$DOC <- str_extract(.data$Image, "(?<=DOC)\\d{2,4}.\\d{2}.\\d{2,4}")
-  .data$ReplicaOrNot <- ifelse(stringr::str_detect(.data$Image, pattern = "Replica|Rep|rep|replica|REPLICA|REP"), "Replica", NA_character_)
+  .data$PID <- get_tok(1)
+  .data$Tissue <- get_tok(2)
+  .data$Date1 <- stringr::str_extract(.data$Image, "\\d{4}.\\d{2}.\\d{2}")
+  .data$DOC <- stringr::str_extract(.data$Image, "(?<=DOC)\\d{2,4}.\\d{2}.\\d{2,4}")
+  .data$ReplicaOrNot <- ifelse(
+    stringr::str_detect(.data$Image, pattern = "(?i)(?:^|_)(?:rep|replica)(?:_|$)"),
+    "Replica",
+    NA_character_
+  )
 
-  .data$Treatment <- sapply(strsplit(.data$Image, "_"), `[`, 5, simplify = FALSE) |> unlist()
+  .data$Treatment <- get_tok(5)
+  tok6 <- get_tok(6)
+  tok7 <- get_tok(7)
+  tok8 <- get_tok(8)
+  tok9 <- get_tok(9)
 
   .data$Concentration1 <- NA_character_
   .data$Concentration2 <- NA_character_
   .data$ConcentrationUnits1 <- NA_character_
   .data$ConcentrationUnits2 <- NA_character_
+  .data$Treatment_complete <- NA_character_
 
-  for (double_patterns in unique(.data$Treatment)) {
-    rows_t <- .data$Treatment == double_patterns
-    number_maiusc <- stringr::str_count(pattern = "[A-Z]", string = double_patterns)
-    if ((number_maiusc >= 2) &
-      (number_maiusc < nchar(double_patterns))) {
-      # save the double drugs
-      multiple_drugs[[double_patterns]] <- double_patterns
-      .data$Concentration1[rows_t] <- sapply(strsplit(.data$Image[rows_t], "_"), `[`, 6, simplify = FALSE) |> unlist()
-      .data$Concentration2[rows_t] <- sapply(strsplit(.data$Image[rows_t], "_"), `[`, 8, simplify = FALSE) |> unlist()
-      .data$ConcentrationUnits1[rows_t] <- sapply(strsplit(.data$Image[rows_t], "_"), `[`, 7, simplify = FALSE) |> unlist()
-      .data$ConcentrationUnits2[rows_t] <- sapply(strsplit(.data$Image[rows_t], "_"), `[`, 9, simplify = FALSE) |> unlist()
-    } else {
-      .data$Concentration1[rows_t] <- str_extract(.data$Image[rows_t], "\\d+(?:\\.\\d+)?(?=_[munp][Mm])")
-      .data$Concentration2[rows_t] <- NA_character_
-      .data$ConcentrationUnits1[rows_t] <- str_extract(.data$Image[rows_t], "[munp][Mm](?=_)")
-      .data$ConcentrationUnits2[rows_t] <- NA_character_
-    }
+  number_maiusc <- stringr::str_count(pattern = "[A-Z]", string = .data$Treatment)
+  has_two_doses <- grepl("^\\d+(?:\\.\\d+)?$", tok6) &
+    grepl("^[munp][Mm]$", tok7) &
+    grepl("^\\d+(?:\\.\\d+)?$", tok8) &
+    grepl("^[munp][Mm]$", tok9)
+  is_double <- !is.na(.data$Treatment) &
+    (number_maiusc >= 2) &
+    (number_maiusc < nchar(.data$Treatment)) &
+    has_two_doses
+
+  if (any(is_double)) {
+    .data$Concentration1[is_double] <- tok6[is_double]
+    .data$ConcentrationUnits1[is_double] <- tok7[is_double]
+    .data$Concentration2[is_double] <- tok8[is_double]
+    .data$ConcentrationUnits2[is_double] <- tok9[is_double]
+  }
+
+  single_rows <- !is_double
+  if (any(single_rows)) {
+    conc_unit_match <- stringr::str_extract(
+      .data$Image[single_rows],
+      "(?<=_)\\d+(?:\\.\\d+)?_[munp][Mm](?=_|$)"
+    )
+    .data$Concentration1[single_rows] <- stringr::str_extract(conc_unit_match, "^\\d+(?:\\.\\d+)?")
+    .data$Concentration2[single_rows] <- NA_character_
+    .data$ConcentrationUnits1[single_rows] <- stringr::str_extract(conc_unit_match, "[munp][Mm]$")
+    .data$ConcentrationUnits2[single_rows] <- NA_character_
   }
 
   # add drug plus concentration plus units
-  for (i in unique(tolower(.data$Treatment))) {
-    rows <- tolower(.data$Treatment) == i
-    # Check if the current treatment is not in the specified list
-    if (i %in% c("dmso", "control", "ctrl", "original")) {
-      .data$Treatment_complete[rows] <- .data$Treatment[rows]
-
-    } else if (i %in% tolower(names(multiple_drugs))){
-      .data$Treatment_complete[rows] <- paste0(.data$Treatment[rows],
-                                               .data$Concentration1[rows],
-                                               .data$ConcentrationUnits1[rows],
-                                               "-",
-                                               .data$Concentration2[rows],
-                                               .data$ConcentrationUnits2[rows]
-                                               )
-    } else {
-      .data$Treatment_complete[rows] <- paste0(.data$Treatment[rows],
-                                               .data$Concentration1[rows],
-                                               .data$ConcentrationUnits1[rows]
-      )
-    }
-  }
+  is_ctrl <- tolower(.data$Treatment) %in% c("dmso", "control", "ctrl", "original")
+  .data$Treatment_complete[is_ctrl] <- .data$Treatment[is_ctrl]
+  .data$Treatment_complete[is_double & !is_ctrl] <- paste0(
+    .data$Treatment[is_double & !is_ctrl],
+    .data$Concentration1[is_double & !is_ctrl],
+    .data$ConcentrationUnits1[is_double & !is_ctrl],
+    "-",
+    .data$Concentration2[is_double & !is_ctrl],
+    .data$ConcentrationUnits2[is_double & !is_ctrl]
+  )
+  single_non_ctrl <- !is_double & !is_ctrl
+  .data$Treatment_complete[single_non_ctrl] <- ifelse(
+    !is.na(.data$Concentration1[single_non_ctrl]) & !is.na(.data$ConcentrationUnits1[single_non_ctrl]),
+    paste0(
+      .data$Treatment[single_non_ctrl],
+      .data$Concentration1[single_non_ctrl],
+      .data$ConcentrationUnits1[single_non_ctrl]
+    ),
+    .data$Treatment[single_non_ctrl]
+  )
 
   return(
     .data

@@ -8,20 +8,11 @@
 #' @return A `dataframe`/`tibble`.
 #' @param .data The markers count dataframe that is coming from the processing of the microscopy data
 #' @param pattern_column_markers The markers' pattern name to obtain the column with ratios of the markers (it defaults to "_ratio_of_total_cells")
-#' @param additional_columns columns that can be additionally added to the longer formatted data.frame, "Defaults as c("Treatment", "PID", "Image_number", "Tissue", "Concentration", "DOC")"
+#' @param additional_columns Logical; whether to keep all standard metadata columns (`PID`, `Date`, `DOC`, `Tissue`, `Image_number`, `Treatment`, `Concentration1`, `Concentration2`, `ConcentrationUnits1`, `ConcentrationUnits2`, `ReplicaOrNot`, `Treatment_complete`) in the long-format output. Defaults to `TRUE`.
 #' @param unique_name_row_identifier String that indicates the unique identifier for each image, defaults as "filter_image"
 #' @export
 #' @examples
 #' \donttest{
-#' # Set up relabeling list
-#' list_of_relabeling <- list(
-#'   "PathCellObject" = "onlyDAPIPositve",
-#'   "cCasp3" = "cCASP3",
-#'   "E-Cadherin: cCASP3" = "E-Cadherin and cCASP3",
-#'   "EpCAM_E-Cadherin" = "E-Cadherin",
-#'   "EpCAM_E-Cadherin and cCASP3" = "E-Cadherin and cCASP3"
-#' )
-#'
 #' # Load and process example data
 #' bind_data <- data_binding(
 #'   path_to_the_projects_folder = system.file("extdata/to_merge/", package = "drugsens")

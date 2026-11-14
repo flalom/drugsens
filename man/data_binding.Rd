@@ -18,17 +18,19 @@ data_binding(
 
 \item{recursive_search}{Boolean, it defined the behavior of the file search, if recursive or not, (default is FALSE)}
 
-\item{forcePath}{String defining an alternative path to the confic file}
+\item{forcePath}{Optional directory path containing \code{config_drugsens.txt}. Defaults to \code{NULL} (\code{tempdir()}).}
 }
 \value{
 A concatenated dataframe from all the files within the indicated path
 }
 \description{
 This function identifies string patterns in the dataset, fills the dataframe
-with that information, and combines all data into a single file
+with that information, and combines all data into a single file. Marker
+relabeling is loaded from \code{config_drugsens.txt} via \code{make_run_config()}
+without modifying \code{.GlobalEnv}.
 }
 \examples{
-\dontrun{
+\donttest{
 bind_data <- data_binding(path_to_the_projects_folder = system.file("extdata/to_merge/",
                          package = "drugsens"))
 }

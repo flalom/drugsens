@@ -1,3 +1,7 @@
+## Test environments
+* local macOS arm64 (aarch64-apple-darwin23), R 4.6.1
+* R-hub / GitHub Actions (ubuntu-latest, R-release)
+
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes

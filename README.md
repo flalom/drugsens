@@ -1,4 +1,4 @@
-![](https://img.shields.io/badge/R-%3E%3D%204.0.0-blue)
+![](https://img.shields.io/badge/R-%3E%3D%204.2.0-blue)
 ![](https://www.r-pkg.org/badges/version/drugsens)
 ![](https://cranlogs.r-pkg.org/badges/last-month/drugsens)
 [![DOI](https://zenodo.org/badge/751272301.svg)](https://doi.org/10.5281/zenodo.14747762)
@@ -11,6 +11,15 @@ Here we include a QuPath&trade; script (the same that we regularly use) to run r
 This script should be placed into scripts manager within QuPath&trade;. We tested this code with previous versions of QuPath&trade;, but new versions should also be compatible.
 This package is complementary to the STAR protocol: [*Protocol for quantifying drug sensitivity in 3D patient-derived ovarian cancer models DOI: 10.1016/j.xpro.2024.103274*](https://doi.org/10.1016/j.xpro.2024.103274).
 
+## Documentation & Vignettes
+
+Full documentation, function references, and step-by-step tutorials are available on the [drugsens documentation site](https://flalom.github.io/drugsens/):
+
+- [Get Started with drugsens](https://flalom.github.io/drugsens/articles/drugsens.html)
+- [1. QuPath Setup & Filename Metadata Conventions](https://flalom.github.io/drugsens/articles/qupath-and-metadata.html)
+- [2. End-to-End Quality Control & Feature Inspection](https://flalom.github.io/drugsens/articles/quality-control-workflow.html)
+- [3. Cohort Normalization, Dose-Response Curves & Statistics](https://flalom.github.io/drugsens/articles/cohort-and-dose-response.html)
+
 # Installation
 
 ``` r
@@ -21,7 +30,7 @@ install.packages("drugsens")
 devtools::install_github("flalom/drugsens")
 ```
 
-`devtools` is required to install drugsens. If `devtools` is not installed yet you can install it with:
+To install the development version from GitHub (optional), `devtools` is used; if not installed yet, you can install it with:
 
 ``` r
 # Install devtools from CRAN
@@ -32,7 +41,7 @@ install.packages("devtools")
 pak::pak("r-lib/devtools")
 ```
 
-You can have a look at it [devtools](https://github.com/r-lib/devtools)
+You can have a look at [devtools](https://github.com/r-lib/devtools).
 
 ### QuPath scripts
 
@@ -90,7 +99,7 @@ setImageType('FLUORESCENCE');
 setChannelNames ('DAPI', 'E-Cadherin', 'Cleaved Caspase 3')
 
 def name = getProjectEntry().getImageName() + '.txt'
-path = buildFilePath(path, '<PID>_<TISSUE>_',Sys.Date(),'_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>')
+path = buildFilePath(path, '<PID>_<TISSUE>_<YYYY-MM-DD>_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>')
 mkdirs(path)
 path = buildFilePath(path, name)
 
@@ -137,7 +146,7 @@ import qupath.lib.objects.PathAnnotationObject
 import qupath.lib.objects.PathRootObject
 
 // Choose your *full* output path
-def outputPath = "<PID>_<TISSUE>_',Sys.Date(),'_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
+def outputPath = "<USER_DEFINED_PATH>/<PID>_<TISSUE>_<YYYY-MM-DD>_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
 
 // Get the list of all images in the current project
 def project = getProject()
@@ -148,7 +157,7 @@ def separator = ","
 
 // Choose the columns that will be included in the export
 // Note: if 'columnsToInclude' is empty, all columns will be included
-def columnsToInclude = new String[]{"Image", "Name", "Class","Centroid X µm","Centroid Y µm","Nucleus: Area", "Nucleus: DAPI mean","Nucleus: E-Cadherin mean", "Nucleus: Cleaved Caspase 3 mean", "Cell: Area","Cell: E-Cadherin mean", "Cell: Cleaved Caspase 3 mean","Cytoplasm: E-Cadherin mean","Cytoplasm: Cleaved Caspase 3 mean","Nucleus/Cell area ratio"}
+def columnsToInclude = new String[]{"Image", "Name", "Class","Centroid X um","Centroid Y um","Nucleus: Area", "Nucleus: DAPI mean","Nucleus: E-Cadherin mean", "Nucleus: Cleaved caspase 3 mean", "Cell: Area","Cell: E-Cadherin mean", "Cell: Cleaved caspase 3 mean","Cytoplasm: E-Cadherin mean","Cytoplasm: Cleaved caspase 3 mean","Nucleus/Cell area ratio"}
 
 // Choose the type of objects that the export will process
 // Other possibilities include:
@@ -181,7 +190,7 @@ You can also set you working directory with `setwd()`.
 
 ### QuPath data in R
 
-To make the QuPath script locally available within the working directory, with the currents date:
+To generate the QuPath export script (`script_for_qupath.txt`) in `tempdir()` (or pass `output_dir = "."` to save it in your working directory):
 
 ``` r
 library("drugsens")
@@ -195,15 +204,14 @@ It is very important that the file naming structure of the QuPath's output is ma
 > **Note:** The `Image` column must be present in the exported CSV for `drugsens` to parse experimental metadata. For two-drug combinations, follow the `CamelCase` convention described under [Bind QuPath files](#bind-qupath-files).
 
 ### Generate configuration file
-This command will generate a `config_drugsens.txt` that should be edited to include the names of the cell markers that have been used by the experimenter.
+This command will generate a `config_drugsens.txt` file in `tempdir()` (or in a custom project folder when `forcePath` is supplied) that can be edited to map raw QuPath marker names to clean names.
 In our case we replaced `"PathCellObject"` with `"onlyDAPIPositve"`.
 
 ``` r
 make_run_config()
 ```
-Once the file `config_drugsens.txt` has been modified; you can feed it back to `R`; this will be done automatically once you run `data_binding()`.
-Now the `list_of_relabeling` should be available in the R environment and it can be used by `drugsens` to work. `list_of_relabeling` is a named list that is required for relabeling the markers name, that is often not user friendly. 
-In case the markers naming doesn't need corrections/relabeling you can leave the `list_of_relabeling` unchanged (but one should still check it).
+Once `config_drugsens.txt` has been modified, `data_binding()` loads it automatically into the package configuration environment (pass `forcePath` if you stored `config_drugsens.txt` in a project directory). `list_of_relabeling` is a named list used to standardize raw QuPath marker names without polluting `.GlobalEnv`. 
+In case the markers naming doesn't need corrections/relabeling you can leave the default configuration unchanged.
 
 > **Note:** We recommend concise, space-free `camelCase` names for cell markers in `list_of_relabeling`:
 >
@@ -278,7 +286,7 @@ A8759_p.wash_2020.11.10_DOC2001.10.05_compoundX34542_10000_uM_EpCAM_Ecad_cCasp3_
 That follows the structure suggested in the QuPath script
 
 ```         
-"<USER_DEFINED_PATH>/<PID>_<TISSUE>_',Sys.Date(),'_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
+"<USER_DEFINED_PATH>/<PID>_<TISSUE>_<YYYY-MM-DD>_<SAMPLE_DOC>_<TREATMENT_INITIALS>_<CONCENTRATION>_<CONCENTRATION_UNITS>_<REPLICA_OR_NOT>_<TUMOR_MARKER>_<APOPTOTIC_MARKER>.csv"
 ```
 > **Warning:** Follow the field order above so `string_parsing()` assigns every token to the right column (`YYYY-MM-DD` dates, `CamelCase` for two-drug combinations such as `CarboplatinPaclitaxel_100_uM_10_nM`, and `.` as a placeholder for missing tokens). See the [QuPath & Metadata tutorial](https://flalom.github.io/drugsens/articles/qupath-and-metadata.html) for worked examples.
 
@@ -321,12 +329,12 @@ fill_color_variable = "Treatment_complete", save_plots = TRUE)
 ``` 
 <img src="man/figures/QC_plot1.png" alt="QC Plot example" title="QC Plot example" width="100%" style="max-width: 950px; height: auto;"/>
 <br>
-This plots shows the ratio of expressed markers in the various conditions, other variables (for `example Tissues` or `Treatment_complete`) can also be used. The data will be, by default, be saved in the current working directory in a folder called `figures` and will make subfolders for each PID present in the dataset.
+This plot shows the ratio of expressed markers across the various conditions; other variables (for example `Tissue` or `Treatment_complete`) can also be used. When `save_plots = TRUE` and `saving_plots_folder = NULL`, files are saved in `file.path(tempdir(), "drugsens_plots")` with subfolders for each PID present in the dataset.
 
 - `.data`: The main dataset, expected to be a dataframe that has been preprocessed and formatted into a long format.
 - `list_of_columns_to_plot`: Specifies which columns in the data should be visualized. Defaults to all numeric columns if not provided.
 - `save_plots`: A boolean flag indicating whether the plots should be saved as files.
-- `saving_plots_folder`: The directory where plot files will be saved, with "figures" as the default.
+- `saving_plots_folder`: The directory where plot files will be saved, defaulting to `file.path(tempdir(), "drugsens_plots")` when `NULL`.
 - `fill_color_variable`: Specifies a variable in the data to use for color-coding the plots, enhancing the visual distinction between different data groups.
 - `PID_column_name`, isolate_specific_drug, isolate_specific_patient: Parameters allowing for the isolation of data based on patient ID or specific treatment, facilitating targeted analysis.
 - `drug_column_name`: Defines the column that indicates the treatment or drug, with "Treatment" as the default.
@@ -377,9 +385,9 @@ More parameters can be specified to personalize the plot(s).
 
 - `.data`: The preprocessed and merged dataframe, expected to be in a long format, typically obtained after processing through make_count_dataframe() and change_data_format_to_longer().
 - `patient_column_name`: Specifies the column in .data that contains patient identifiers (defaults to "PID").
-- `colors`: A vector of colors for the plots. Defaults to a colorblind-safe 4-hue set (blue, orange, aqua, yellow).
+- `colors`: A vector of colors for the plots. Defaults to `unname(drugsens_palette)` (an 8-color CVD-safe palette).
 - `save_plots`: A Boolean flag indicating whether to save the generated plots. If TRUE, plots are saved in the specified directory.
-- `folder_name`: The name of the folder where plots will be saved if save_plots is TRUE. Defaults to "figures".
+- `folder_name`: The directory where plots will be saved if `save_plots = TRUE`. Defaults to `file.path(tempdir(), "figures")` when `NULL`.
 - `isolate_a_specific_patient`: If specified, QC plots will be generated for this patient only. Defaults to NULL, meaning plots will be generated for all patients.
 - `x_plot_var`: The variable to be used on the x-axis, typically indicating different treatments. Defaults to "Treatment_complete".
 
