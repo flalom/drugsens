@@ -1,0 +1,12 @@
+pandoc: '3.14'
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  cohort-and-dose-response: cohort-and-dose-response.html
+  drugsens: drugsens.html
+  quality-control-workflow: quality-control-workflow.html
+  qupath-and-metadata: qupath-and-metadata.html
+last_built: 2026-11-14T13:45Z
+urls:
+  reference: https://flalom.github.io/drugsens/reference
+  article: https://flalom.github.io/drugsens/articles

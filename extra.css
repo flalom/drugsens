@@ -1,0 +1,26 @@
+/* Clean callout styling for blockquotes in README and vignettes */
+main blockquote,
+.contents blockquote {
+  background-color: #f3f7fc;
+  border-left: 4px solid #2a78d6;
+  border-radius: 0 0.45rem 0.45rem 0;
+  padding: 0.85rem 1.15rem;
+  margin: 1.25rem 0;
+  color: #1f2937;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+main blockquote p:last-child,
+main blockquote ul:last-child,
+.contents blockquote p:last-child,
+.contents blockquote ul:last-child {
+  margin-bottom: 0;
+}
+
+main blockquote ul,
+.contents blockquote ul {
+  margin-top: 0.4rem;
+  padding-left: 1.25rem;
+}
