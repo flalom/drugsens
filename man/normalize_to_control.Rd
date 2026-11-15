@@ -69,8 +69,8 @@ computes each individual marker pair's readout as well as a combined
 \code{consensus_only = TRUE} to return only the combined consensus readout.}
 }
 \value{
-\code{.data} with an added column per normalized value: "\if{html}{\out{<column>}}_pct_of_control"
-in wide format, or a single "pct_of_control" column in long format. When
+\code{.data} with an added column per normalized value: \code{"<column>_pct_of_control"}
+in wide format, or a single \code{"pct_of_control"} column in long format. When
 \code{dead_markers} is supplied, also includes \code{dead_cells_ratio},
 \code{viable_cells_ratio}, \code{total_target_cells_ratio}, \code{dead_fraction},
 \code{viable_fraction}, and \code{is_consensus}.

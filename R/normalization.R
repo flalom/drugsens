@@ -74,8 +74,8 @@ drugsens_match_markers <- function(user_markers, available_markers, arg_name = "
 #'   computes each individual marker pair's readout as well as a combined
 #'   `"Consensus (Combined)"` readout across all selected markers. Set
 #'   `consensus_only = TRUE` to return only the combined consensus readout.
-#' @return `.data` with an added column per normalized value: "<column>_pct_of_control"
-#'   in wide format, or a single "pct_of_control" column in long format. When
+#' @return `.data` with an added column per normalized value: `"<column>_pct_of_control"`
+#'   in wide format, or a single `"pct_of_control"` column in long format. When
 #'   `dead_markers` is supplied, also includes `dead_cells_ratio`,
 #'   `viable_cells_ratio`, `total_target_cells_ratio`, `dead_fraction`,
 #'   `viable_fraction`, and `is_consensus`.

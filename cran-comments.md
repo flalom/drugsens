@@ -1,3 +1,9 @@
+## Resubmission
+This is a resubmission of drugsens 0.2.0 addressing the incoming CRAN pretest checks:
+
+* Fixed the HTML manual validation problem in `man/normalize_to_control.Rd` where `<column>` inside `<column>_pct_of_control` was unescaped in the roxygen `@return` tag and emitted as a raw HTML tag.
+* Confirmed maintainer email update: I have changed my maintainer email from my former institutional address (`flavio.lombardo@unibas.ch`) to my permanent personal address (`fl@flaviolombardo.site`). I am the same author and maintainer (Flavio Lombardo, ORCID 0000-0002-4853-6838) and no longer have access to the former institutional mailbox.
+
 ## Test environments
 * local macOS arm64 (aarch64-apple-darwin23), R 4.6.1
 * R-hub / GitHub Actions (ubuntu-latest, R-release)
